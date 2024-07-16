@@ -15,8 +15,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Almenara Backend API",
+        default_version='v1',
+        description="Almenara backend made for recruitment and rotation purposes of the internship program",
+        terms_of_service="https://www.essalud.gob.pe/hospital-almenara-de-essalud-fue-categorizado-a-instituto-de-salud-especializado/",
+        contact=openapi.Contact(email="anllacarpro@gmail.com"),
+        license=openapi.License(name="Awesome License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 urlpatterns = [
      path("admin/", admin.site.urls),
      path('api/', include('api.urls')),
+     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     ]
