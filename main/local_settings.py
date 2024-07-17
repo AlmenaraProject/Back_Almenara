@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "api",
-    "drf_yasg"
+    "drf_yasg",
+    "rest_framework.authtoken"
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,4 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+AUTH_USER_MODEL = "api.Usuario"
