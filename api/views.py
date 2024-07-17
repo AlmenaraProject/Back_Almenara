@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 from api.serializers import *
 from django.template.loader import render_to_string
@@ -132,7 +133,11 @@ class LoginView(APIView):
 
         if not user.check_password(password):
             return Response("Invalid password", status=status.HTTP_401_UNAUTHORIZED)
-
+        
+        # Actualizar el campo last_login del usuario
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+        print(user.last_login)
         # Check if a token already exists for the user
         token, created = Token.objects.get_or_create(user=user)
         serializer = LoginSerializer(user)
@@ -141,6 +146,12 @@ class LoginView(APIView):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@swagger_auto_schema(
+    operation_description="Logout",
+    responses={
+        200: "Logged out successfully",
+    },
+)
 def logout(request):
     token = request.auth
     token.delete()
