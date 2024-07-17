@@ -146,13 +146,16 @@ class LoginView(APIView):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-@swagger_auto_schema(
-    operation_description="Logout",
-    responses={
-        200: "Logged out successfully",
-    },
-)
 def logout(request):
+    print(request.auth)
     token = request.auth
     token.delete()
     return Response("Logged out successfully", status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+

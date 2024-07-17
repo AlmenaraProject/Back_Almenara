@@ -13,4 +13,5 @@ urlpatterns = [
     path('', include(routers.urls)),
     path('signup/', SingnupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
+    path('logout/', logout, name='logout'),
 ]
