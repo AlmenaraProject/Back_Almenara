@@ -35,8 +35,16 @@ class SingnupView(APIView):
             properties={
                 'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
                 'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password'),
-                'persona': openapi.Schema(type=openapi.TYPE_OBJECT, description='Persona'),
-                'rol': openapi.Schema(type=openapi.TYPE_INTEGER, description='Rol del usuario'),
+                'persona': openapi.Schema(type=openapi.TYPE_OBJECT, description='Persona', properties={
+                    'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
+                    'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
+                    'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
+                    'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
+                    'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
+                    'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
+                }),
+                'rol': openapi.Schema(type=openapi.TYPE_STRING, description='ID del rol del usuario'),
             },
             required=['email', 'password', 'persona', 'rol']
         ),
