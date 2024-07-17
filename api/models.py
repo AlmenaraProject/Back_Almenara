@@ -52,3 +52,72 @@ class Universidad(models.Model):
     def __str__(self):
         return self.nombre
     
+class Especialidad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    coordinador = models.ForeignKey('Persona', on_delete=models.CASCADE)
+    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    def __str__(self):
+        return self.nombre
+
+class Sede_Adjudicacion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=200)
+    ciudad = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre   
+
+class Plaza(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    
+class Entidad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+
+class Centro_Asistencial(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=200)
+    estado = models.BooleanField(default=True)
+
+class Tipo_profesional(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+
+class Profesional(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
+    CMP = models.CharField(max_length=20)
+    especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
+    plaza = models.OneToOneField('Plaza', on_delete=models.CASCADE)
+    entidad = models.ForeignKey('Entidad', on_delete=models.CASCADE)
+    centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
+    universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
+    fecha_inscripcion = models.DateField()
+    fecha_modificacion = models.DateField()
+    Usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+        
+    
+    
+    
+    
+    
+
+    
+     
+
+
+    
+    

@@ -23,6 +23,20 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = '__all__'
 
+class UniversidadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Universidad
+        fields = '__all__'
+class EspecialidadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Especialidad
+        fields = '__all__'
+class Sede_AdjudicacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sede_Adjudicacion
+        fields = '__all__'
+
+
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     password = serializers.CharField(
