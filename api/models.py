@@ -55,7 +55,7 @@ class Universidad(models.Model):
 class Especialidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
-    coordinador = models.ForeignKey('Persona', on_delete=models.CASCADE)
+    coordinador = models.ForeignKey('Persona', on_delete=models.CASCADE, null=True)
     universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
     def __str__(self):
         return self.nombre
