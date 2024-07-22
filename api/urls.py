@@ -8,6 +8,10 @@ routers = routers.DefaultRouter()
 routers.register(r'rol', RolViewSet)
 routers.register(r'persona', PersonaViewSet)
 routers.register(r'tipo-documento', TipoDocumentoViewSet)
+routers.register(r'universidad', UniversidadViewSet)
+routers.register(r'especialidad', EspecialidadViewSet)
+routers.register(r'sede-adjudicacion', Sede_AdjudicacionViewSet)
+
 
 urlpatterns = [
     path('', include(routers.urls)),

@@ -27,7 +27,20 @@ class TipoDocumentoViewSet(viewsets.ModelViewSet):
 class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
-    
+
+
+class UniversidadViewSet(viewsets.ModelViewSet):
+    queryset = Universidad.objects.all()
+    serializer_class = UniversidadSerializer
+
+class EspecialidadViewSet(viewsets.ModelViewSet):
+    queryset = Especialidad.objects.all()
+    serializer_class = EspecialidadSerializer
+
+class Sede_AdjudicacionViewSet(viewsets.ModelViewSet):
+    queryset = Sede_Adjudicacion.objects.all()
+    serializer_class = Sede_AdjudicacionSerializer
+     
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",
