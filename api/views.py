@@ -170,7 +170,41 @@ class LoginView(APIView):
         token, created = Token.objects.get_or_create(user=user)
         serializer = LoginSerializer(user)
         return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)
-        
+
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+class UserDetails(APIView):
+    @swagger_auto_schema(
+        operation_description="Obtener detalles del usuario",
+        manual_parameters=[openapi.Parameter(
+            'Authorization', openapi.IN_HEADER, description="Token de autenticación", type=openapi.TYPE_STRING)],
+        responses={200: openapi.Response('User details', UsuarioSerializer)},
+    )
+    def get(self, request, format=None):
+        user = request.user  # El usuario autenticado actualmente
+        # Puedes personalizar los datos que deseas devolver
+        user_data = {
+            'id': user.id,
+            'email': user.email,
+            'is_active': user.is_active,
+            'last_login': user.last_login,
+            'persona': {
+                'id': user.persona.id,
+                'nombre': user.persona.nombre,
+                'apellido': user.persona.apellido,
+                'tipo_documento': user.persona.tipo_documento.nombre,
+                'documento_identidad': user.persona.numero_documento,
+                'direccion': user.persona.direccion,
+                'telefono': user.persona.telefono,
+            },
+            'rol':{
+                'id': user.rol.id,
+                'nombre': user.rol.nombre,
+                'estado': user.rol.estado
+            }
+        }
+        return Response(user_data)
+       
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
