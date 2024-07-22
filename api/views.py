@@ -28,10 +28,17 @@ class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
 
-
 class UniversidadViewSet(viewsets.ModelViewSet):
     queryset = Universidad.objects.all()
     serializer_class = UniversidadSerializer
+
+class PlazaViewSet(viewsets.ModelViewSet):
+    queryset = Plaza.objects.all()
+    serializer_class = PlazaSerializer
+
+class EntidadViewSet(viewsets.ModelViewSet):
+    queryset = Entidad.objects.all()
+    serializer_class = EntidadSerializer
 
 class EspecialidadViewSet(viewsets.ModelViewSet):
     queryset = Especialidad.objects.all()
@@ -40,6 +47,14 @@ class EspecialidadViewSet(viewsets.ModelViewSet):
 class Sede_AdjudicacionViewSet(viewsets.ModelViewSet):
     queryset = Sede_Adjudicacion.objects.all()
     serializer_class = Sede_AdjudicacionSerializer
+
+class CentroAsistencialViewSet(viewsets.ModelViewSet):
+    queryset = Centro_Asistencial.objects.all()
+    serializer_class = CentroAsistencialSerializer
+
+class TipoProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = Tipo_profesional.objects.all()
+    serializer_class = TipoProfesionalSerializer
      
 class SingnupView(APIView):
     @swagger_auto_schema(

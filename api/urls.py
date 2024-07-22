@@ -11,6 +11,10 @@ routers.register(r'tipo-documento', TipoDocumentoViewSet)
 routers.register(r'universidad', UniversidadViewSet)
 routers.register(r'especialidad', EspecialidadViewSet)
 routers.register(r'sede-adjudicacion', Sede_AdjudicacionViewSet)
+routers.register(r'centro-asistencial', CentroAsistencialViewSet)
+routers.register(r'tipo-profesional', TipoProfesionalViewSet)
+routers.register(r'plaza', PlazaViewSet)
+routers.register(r'entidad', EntidadViewSet)
 
 
 urlpatterns = [

@@ -27,6 +27,17 @@ class UniversidadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Universidad
         fields = '__all__'
+        
+class PlazaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plaza
+        fields = '__all__'
+
+class EntidadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entidad
+        fields = '__all__'
+
 class EspecialidadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Especialidad
@@ -35,6 +46,17 @@ class Sede_AdjudicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sede_Adjudicacion
         fields = '__all__'
+
+class CentroAsistencialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Centro_Asistencial
+        fields = '__all__'
+
+class TipoProfesionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tipo_profesional
+        fields = '__all__'
+        
 
 
 class SignupSerializer(serializers.ModelSerializer):
