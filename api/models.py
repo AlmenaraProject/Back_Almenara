@@ -14,7 +14,17 @@ class Persona(models.Model):
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
     def __str__(self):
         return self.nombre + ' ' + self.apellido
-    
+ 
+class Coordinador(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    documento = models.CharField(max_length=250, null=True)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.persona.nombre + ' ' + self.persona.apellido 
+
+   
 class TipoDocumento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
@@ -47,7 +57,7 @@ class Universidad(models.Model):
     nombre = models.CharField(max_length=100)
     siglas = models.CharField(max_length=20)
     ciudad = models.CharField(max_length=100)
-    coordinador_general = models.ForeignKey('Persona', on_delete=models.CASCADE, null=True)
+    coordinador_general = models.ForeignKey('Coordinador', on_delete=models.CASCADE, null=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
@@ -55,8 +65,9 @@ class Universidad(models.Model):
 class Especialidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
-    coordinador = models.ForeignKey('Persona', on_delete=models.CASCADE, null=True)
+    coordinador = models.ForeignKey('Coordinador', on_delete=models.CASCADE, null=True)
     universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
 
