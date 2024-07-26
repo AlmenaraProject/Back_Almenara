@@ -221,7 +221,7 @@ def logout(request):
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
-        fields = ['fecha_inscripcion','fecha_modificacion','estado','especialidad','centro_Asistencial','tipo_profesional','plaza','entidad']
+        fields = ['persona','CMP','fecha_inscripcion','fecha_modificacion','estado','especialidad','centro_Asistencial','tipo_profesional','plaza','entidad']
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
@@ -230,6 +230,8 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
     filterset_class = ProfesionalFilter
 
     @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('persona', openapi.IN_QUERY, description="Persona", type=openapi.TYPE_STRING),
+        openapi.Parameter('CMP', openapi.IN_QUERY, description="CMP", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_inscripcion', openapi.IN_QUERY, description="Fecha de inscripción", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
         openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
