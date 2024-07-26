@@ -229,6 +229,19 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProfesionalFilter
 
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('fecha_inscripcion', openapi.IN_QUERY, description="Fecha de inscripción", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+        openapi.Parameter('especialidad', openapi.IN_QUERY, description="Especialidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('centro_Asistencial', openapi.IN_QUERY, description="Centro Asistencial", type=openapi.TYPE_STRING),
+        openapi.Parameter('tipo_profesional', openapi.IN_QUERY, description="Tipo de profesional", type=openapi.TYPE_STRING),
+        openapi.Parameter('plaza', openapi.IN_QUERY, description="Plaza", type=openapi.TYPE_STRING),
+        openapi.Parameter('entidad', openapi.IN_QUERY, description="Entidad", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 
 
