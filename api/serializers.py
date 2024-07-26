@@ -56,8 +56,11 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tipo_profesional
         fields = '__all__'
-        
-
+    
+class ProfesionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profesional
+        fields = '__all__'
 
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()

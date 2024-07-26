@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "api",
     "drf_yasg",
-    "rest_framework.authtoken"
+    "rest_framework.authtoken",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -132,4 +133,9 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
 AUTH_USER_MODEL = "api.Usuario"
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}

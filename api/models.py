@@ -105,6 +105,14 @@ class Tipo_profesional(models.Model):
     def __str__(self):
         return self.nombre
 
+class Plan_trabajo(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    Universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    estado = models.BooleanField(default=True)
+
 class Profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
@@ -119,16 +127,3 @@ class Profesional(models.Model):
     fecha_modificacion = models.DateField()
     Usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
     estado = models.BooleanField(default=True)
-        
-    
-    
-    
-    
-    
-
-    
-     
-
-
-    
-    

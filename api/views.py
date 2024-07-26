@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework import viewsets
 from django.contrib.auth import get_user_model
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 # Create your views here.
 
 class RolViewSet(viewsets.ModelViewSet):
@@ -213,6 +215,19 @@ def logout(request):
     token = request.auth
     token.delete()
     return Response("Logged out successfully", status=status.HTTP_200_OK)
+
+
+
+class ProfesionalFilter(django_filters.FilterSet):
+    class Meta:
+        model = Profesional
+        fields = ['fecha_inscripcion','fecha_modificacion','estado','especialidad','centro_Asistencial','tipo_profesional','plaza','entidad']
+
+class ProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = Profesional.objects.all()
+    serializer_class = ProfesionalSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProfesionalFilter
 
 
 
