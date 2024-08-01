@@ -268,8 +268,6 @@ def logout(request):
     token.delete()
     return Response("Logged out successfully", status=status.HTTP_200_OK)
 
-
-
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
