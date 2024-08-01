@@ -148,7 +148,7 @@ class Curso(models.Model):
 
 class Postulacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    profesional = models.ManyToManyField('Profesional')
+    profesional = models.ForeignKey('Profesional', on_delete=models.CASCADE)
     plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
     fecha_postulacion = models.DateField()
     estado = models.BooleanField(default=True)
