@@ -70,10 +70,29 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class = ProfesorSerializer
 
+class PostulacionFilter(django_filters.FilterSet):
+    class Meta:
+        model = Postulacion
+        fields = ['profesional','plan_trabajo','fecha_postulacion','estado']
+        
+class PostulacionViewSet(viewsets.ModelViewSet):
+    queryset = Postulacion.objects.all()
+    serializer_class = PostulacionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PostulacionFilter
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('profesional', openapi.IN_QUERY, description="Profesional", type=openapi.TYPE_STRING),
+        openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_postulacion', openapi.IN_QUERY, description="Fecha de postulación", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class CursoFilter(django_filters.FilterSet):
     class Meta:
         model = Curso
-        fields = ['nombre','postulacion','Profesor','fecha_inicio','fecha_fin','estado']
+        fields = ['nombre','postulacion','profesor','fecha_inicio','fecha_fin','estado']
 
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()

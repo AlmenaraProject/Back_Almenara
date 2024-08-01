@@ -81,6 +81,11 @@ class ProfesorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profesor
         fields = '__all__'
+        
+class PostulacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postulacion
+        fields = '__all__'
 
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
