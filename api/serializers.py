@@ -62,6 +62,26 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         model = Profesional
         fields = '__all__'
 
+class PlanTrabajoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan_trabajo
+        fields = '__all__'
+        
+class CoordinadorSerializer(serializers.ModelSerializer):       
+    class Meta:
+        model = Coordinador
+        fields = '__all__'
+
+class CursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Curso
+        fields = '__all__'
+
+class ProfesorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profesor
+        fields = '__all__'
+
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     password = serializers.CharField(

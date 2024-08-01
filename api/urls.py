@@ -16,6 +16,10 @@ routers.register(r'tipo-profesional', TipoProfesionalViewSet)
 routers.register(r'plaza', PlazaViewSet)
 routers.register(r'entidad', EntidadViewSet)
 routers.register(r'profesional', ProfesionalViewSet)
+routers.register(r'plan-trabajo', PlanTrabajoViewSet)
+routers.register(r'coordinador', CoordinadorViewSet)
+routers.register(r'curso', CursoViewSet)
+routers.register(r'profesor', ProfesorViewSet)
 
 
 urlpatterns = [

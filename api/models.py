@@ -52,25 +52,34 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
     
+class Profesor(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    documento = models.CharField(max_length=250, null=True)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre + ' ' + self.apellido
+    
+class Especialidad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    Coordinador = models.ForeignKey('Coordinador',on_delete=models.CASCADE, null=True)
+    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    
 class Universidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
     siglas = models.CharField(max_length=20)
     ciudad = models.CharField(max_length=100)
-    coordinador_general = models.ForeignKey('Coordinador', on_delete=models.CASCADE, null=True)
+    Coordinador = models.ForeignKey('Coordinador',on_delete=models.CASCADE, null=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
     
-class Especialidad(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombre = models.CharField(max_length=100)
-    coordinador = models.ForeignKey('Coordinador', on_delete=models.CASCADE, null=True)
-    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
-    estado = models.BooleanField(default=True)
-    def __str__(self):
-        return self.nombre
-
 class Sede_Adjudicacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
@@ -126,4 +135,20 @@ class Profesional(models.Model):
     fecha_inscripcion = models.DateField()
     fecha_modificacion = models.DateField()
     Usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+
+class Curso(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    postulacion = models.ManyToManyField('Postulacion')
+    Profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    estado = models.BooleanField(default=True)
+
+class Postulacion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    profesional = models.ManyToManyField('Profesional')
+    plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
+    fecha_postulacion = models.DateField()
     estado = models.BooleanField(default=True)

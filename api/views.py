@@ -57,6 +57,39 @@ class CentroAsistencialViewSet(viewsets.ModelViewSet):
 class TipoProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Tipo_profesional.objects.all()
     serializer_class = TipoProfesionalSerializer
+
+class PlanTrabajoViewSet(viewsets.ModelViewSet):
+    queryset = Plan_trabajo.objects.all()
+    serializer_class = PlanTrabajoSerializer
+
+class CoordinadorViewSet(viewsets.ModelViewSet):
+    queryset = Coordinador.objects.all()
+    serializer_class = CoordinadorSerializer
+
+class ProfesorViewSet(viewsets.ModelViewSet):
+    queryset = Profesor.objects.all()
+    serializer_class = ProfesorSerializer
+
+class CursoFilter(django_filters.FilterSet):
+    class Meta:
+        model = Curso
+        fields = ['nombre','postulacion','Profesor','fecha_inicio','fecha_fin','estado']
+
+class CursoViewSet(viewsets.ModelViewSet):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CursoFilter
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del curso", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_inicio', openapi.IN_QUERY, description="Fecha de inicio", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_fin', openapi.IN_QUERY, description="Fecha de fin", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+        openapi.Parameter('profesor', openapi.IN_QUERY, description="Profesor", type=openapi.TYPE_STRING),
+        openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
      
 class SingnupView(APIView):
     @swagger_auto_schema(
