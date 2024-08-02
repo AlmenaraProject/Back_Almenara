@@ -19,9 +19,12 @@ class TipoDocumentoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    persona = PersonaSerializer()
+    rol = RolSerializer()
+
     class Meta:
         model = Usuario
-        fields = 'id', 'email', 'persona', 'rol', 'estado', 'last_login'
+        fields = ['id', 'email', 'persona', 'rol', 'estado', 'last_login']
 
 class UniversidadSerializer(serializers.ModelSerializer):
     class Meta:
