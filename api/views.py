@@ -70,6 +70,10 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class = ProfesorSerializer
 
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
 class PostulacionFilter(django_filters.FilterSet):
     class Meta:
         model = Postulacion
