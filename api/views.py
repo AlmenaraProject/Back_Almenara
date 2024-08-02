@@ -70,7 +70,7 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class = ProfesorSerializer
 
-class UsuarioViewSet(viewsets.ModelViewSet):
+class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
