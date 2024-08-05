@@ -22,7 +22,7 @@ class Coordinador(models.Model):
     documento = models.CharField(max_length=250, null=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
-        return self.persona.nombre + ' ' + self.persona.apellido 
+        return self.nombre + ' ' + self.apellido 
 
    
 class TipoDocumento(models.Model):
