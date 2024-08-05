@@ -31,31 +31,31 @@ class PersonaViewSet(viewsets.ModelViewSet):
     serializer_class = PersonaSerializer
 
 class UniversidadViewSet(viewsets.ModelViewSet):
-    queryset = Universidad.objects.all()
+    queryset = Universidad.objects.all().order_by('id')
     serializer_class = UniversidadSerializer
 
 class PlazaViewSet(viewsets.ModelViewSet):
-    queryset = Plaza.objects.all()
+    queryset = Plaza.objects.all().order_by('id')
     serializer_class = PlazaSerializer
 
 class EntidadViewSet(viewsets.ModelViewSet):
-    queryset = Entidad.objects.all()
+    queryset = Entidad.objects.all().order_by('id')
     serializer_class = EntidadSerializer
 
 class EspecialidadViewSet(viewsets.ModelViewSet):
-    queryset = Especialidad.objects.all()
+    queryset = Especialidad.objects.all().order_by('id')
     serializer_class = EspecialidadSerializer
 
 class Sede_AdjudicacionViewSet(viewsets.ModelViewSet):
-    queryset = Sede_Adjudicacion.objects.all()
+    queryset = Sede_Adjudicacion.objects.all().order_by('id')
     serializer_class = Sede_AdjudicacionSerializer
 
 class CentroAsistencialViewSet(viewsets.ModelViewSet):
-    queryset = Centro_Asistencial.objects.all()
+    queryset = Centro_Asistencial.objects.all().order_by('id')
     serializer_class = CentroAsistencialSerializer
 
 class TipoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Tipo_profesional.objects.all()
+    queryset = Tipo_profesional.objects.all().order_by('id')
     serializer_class = TipoProfesionalSerializer
 
 class PlanTrabajoViewSet(viewsets.ModelViewSet):
