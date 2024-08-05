@@ -29,10 +29,26 @@ class TipoDocumentoViewSet(viewsets.ModelViewSet):
 class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
+    
+class UniversidadFilter(django_filters.FilterSet):
+    class Meta:
+        model = Universidad
+        fields = ['nombre','estado','coordinador','siglas','ciudad']
 
 class UniversidadViewSet(viewsets.ModelViewSet):
     queryset = Universidad.objects.all().order_by('id')
     serializer_class = UniversidadSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UniversidadFilter
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre de la universidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado de la universidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('coordinador', openapi.IN_QUERY, description="Coordinador de la universidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('siglas', openapi.IN_QUERY, description="Siglas de la universidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('ciudad', openapi.IN_QUERY, description="Ciudad de la universidad", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class PlazaViewSet(viewsets.ModelViewSet):
     queryset = Plaza.objects.all().order_by('id')
