@@ -140,8 +140,9 @@ class Profesional(models.Model):
 class Curso(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
-    postulacion = models.ManyToManyField('Postulacion')
-    profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE)
+    postulacion = models.ManyToManyField('Postulacion', blank=True)
+    profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE, null=True)
+    modalidad = models.CharField(max_length=100)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     estado = models.BooleanField(default=True)
