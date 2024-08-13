@@ -14,6 +14,11 @@ class Persona(models.Model):
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
     def __str__(self):
         return self.nombre + ' ' + self.apellido
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.apellido = self.apellido.upper()
+        self.direccion = self.direccion.upper()
+        super(Persona, self).save(*args, **kwargs)
  
 class Coordinador(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -22,7 +27,11 @@ class Coordinador(models.Model):
     documento = models.CharField(max_length=250, null=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
-        return self.nombre + ' ' + self.apellido 
+        return self.nombre + ' ' + self.apellido
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.apellido = self.apellido.upper()
+        super(Coordinador, self).save(*args, **kwargs) 
 
 class TipoDocumento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -30,6 +39,9 @@ class TipoDocumento(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(TipoDocumento, self).save(*args, **kwargs)
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -127,6 +139,7 @@ class Profesional(models.Model):
     fecha_inscripcion = models.DateField()
     fecha_modificacion = models.DateField()
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
+    is_postgraduado = models.BooleanField(default=False)
     estado = models.BooleanField(default=True)
 
 class Plan_trabajo(models.Model):
