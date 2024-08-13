@@ -15,6 +15,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from django.contrib.auth import get_user_model
 import django_filters
+from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 # Create your views here.
 
@@ -90,6 +91,17 @@ class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
+    def partial_update(self, request, pk=None):
+        usuario = self.get_queryset().filter(pk=pk).first()
+        if not usuario:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.get_serializer_class()(usuario, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class PostulacionFilter(django_filters.FilterSet):
     class Meta:
         model = Postulacion
@@ -129,7 +141,8 @@ class CursoViewSet(viewsets.ModelViewSet):
     ])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-     
+
+   
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",
