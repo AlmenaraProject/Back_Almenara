@@ -30,5 +30,5 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('user-details/', UserDetails.as_view(), name='UserDetails'),
     path('logout/', logout, name='logout'),
-    path('import-data/', ImportDataView.as_view(), name='import-data'),
+
 ]
