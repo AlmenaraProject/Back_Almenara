@@ -2,7 +2,7 @@ from django.urls import path, include, re_path
 from rest_framework import routers
 
 from api.views import *
-
+from api.importviews import *
 routers = routers.DefaultRouter()
 
 routers.register(r'rol', RolViewSet)
@@ -30,4 +30,5 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('user-details/', UserDetails.as_view(), name='UserDetails'),
     path('logout/', logout, name='logout'),
+    path('import-data/', ImportDataView.as_view(), name='import-data'),
 ]
