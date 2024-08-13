@@ -62,6 +62,10 @@ class Rol(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.descripcion = self.descripcion.upper()
+        super(Rol, self).save(*args, **kwargs)
     
 class Profesor(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -71,6 +75,10 @@ class Profesor(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre + ' ' + self.apellido
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.apellido = self.apellido.upper()
+        super(Profesor, self).save(*args, **kwargs)
     
 class Especialidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -80,6 +88,9 @@ class Especialidad(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Especialidad, self).save(*args, **kwargs)
     
 class Universidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -90,6 +101,11 @@ class Universidad(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.siglas = self.siglas.upper()
+        self.ciudad = self.ciudad.upper()
+        super(Universidad, self).save(*args, **kwargs)
     
 class Sede_Adjudicacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -99,11 +115,21 @@ class Sede_Adjudicacion(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre   
-
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.direccion = self.direccion.upper()
+        self.ciudad = self.ciudad.upper()
+        super(Sede_Adjudicacion, self).save(*args, **kwargs)
+        
 class Plaza(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
     estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Plaza, self).save(*args, **kwargs)
     
 class Entidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -111,12 +137,21 @@ class Entidad(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Entidad, self).save(*args, **kwargs)
 
 class Centro_Asistencial(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=200)
     estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.direccion = self.direccion.upper()
+        super(Centro_Asistencial, self).save(*args, **kwargs)
 
 class Tipo_profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -124,6 +159,9 @@ class Tipo_profesional(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Tipo_profesional, self).save(*args, **kwargs)
 
 class Profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -141,6 +179,11 @@ class Profesional(models.Model):
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
     is_postgraduado = models.BooleanField(default=False)
     estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.persona.nombre + ' ' + self.persona.apellido
+    def save(self , *args, **kwargs):
+        self.CMP = self.CMP.upper()
+        super(Profesional, self).save(*args, **kwargs)
 
 class Plan_trabajo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -152,7 +195,10 @@ class Plan_trabajo(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre + ' ' + self.universidad.nombre + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
-
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Plan_trabajo, self).save(*args, **kwargs)
+    
 class Acuerdo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     compromiso = models.CharField(max_length=200)
@@ -166,7 +212,11 @@ class Acuerdo(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.compromiso + ' ' + self.detalle + ' ' + self.sede_Adjudicacion.nombre + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
- 
+    def save(self , *args, **kwargs):
+        self.compromiso = self.compromiso.upper()
+        self.detalle = self.detalle.upper()
+        super(Acuerdo, self).save(*args, **kwargs)
+
 class Curso(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
@@ -176,6 +226,12 @@ class Curso(models.Model):
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.modalidad = self.modalidad.upper()
+        super(Curso, self).save(*args, **kwargs)
 
 class Postulacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -183,3 +239,5 @@ class Postulacion(models.Model):
     plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
     fecha_postulacion = models.DateField()
     estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.profesional.persona.nombre + ' ' + self.profesional.persona.apellido + ' ' + self.plan_trabajo.nombre + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
