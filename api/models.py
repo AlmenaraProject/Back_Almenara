@@ -136,7 +136,7 @@ class Profesional(models.Model):
     universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
     tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
-    fecha_inscripcion = models.DateField(auto_created=True)
+    fecha_inscripcion = models.DateField(auto_now_add=True)
     fecha_modificacion = models.DateField(auto_now=True)
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
     is_postgraduado = models.BooleanField(default=False)
