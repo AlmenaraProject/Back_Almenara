@@ -24,7 +24,6 @@ class Coordinador(models.Model):
     def __str__(self):
         return self.nombre + ' ' + self.apellido 
 
-   
 class TipoDocumento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
@@ -114,14 +113,6 @@ class Tipo_profesional(models.Model):
     def __str__(self):
         return self.nombre
 
-class Plan_trabajo(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombre = models.CharField(max_length=100)
-    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    estado = models.BooleanField(default=True)
-
 class Profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
@@ -132,11 +123,37 @@ class Profesional(models.Model):
     centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
     universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
     tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
+    plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
     fecha_inscripcion = models.DateField()
     fecha_modificacion = models.DateField()
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
     estado = models.BooleanField(default=True)
 
+class Plan_trabajo(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    acuerdo = models.ManyToManyField('Acuerdo', blank=True)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre + ' ' + self.universidad.nombre + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
+
+class Acuerdo(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    compromiso = models.CharField(max_length=200)
+    detalle = models.CharField(max_length=200)
+    sede_Adjudicacion = models.ForeignKey('Sede_Adjudicacion', on_delete=models.CASCADE)
+    beneficiarios = models.IntegerField()
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    valorizacion = models.FloatField()
+    is_esssalud_responsable = models.BooleanField()
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.compromiso + ' ' + self.detalle + ' ' + self.sede_Adjudicacion.nombre + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
+ 
 class Curso(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
