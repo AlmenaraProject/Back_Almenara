@@ -332,9 +332,7 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
         openapi.Parameter('plaza', openapi.IN_QUERY, description="Plaza", type=openapi.TYPE_STRING),
         openapi.Parameter('entidad', openapi.IN_QUERY, description="Entidad", type=openapi.TYPE_STRING),
     ])
-    def list(self, request, *args, **kwargs):
-        Profesional.objects.all()
-        
+    def list(self, request, *args, **kwargs): 
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(

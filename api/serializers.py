@@ -56,6 +56,7 @@ class CentroAsistencialSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TipoProfesionalSerializer(serializers.ModelSerializer):
+    persona = PersonaSerializer()
     class Meta:
         model = Tipo_profesional
         fields = '__all__'
