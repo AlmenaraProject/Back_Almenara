@@ -87,6 +87,10 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class = ProfesorSerializer
 
+class GrupoProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = Grupo_profesional.objects.all()
+    serializer_class = GrupoProfesionalSerializer
+
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -345,9 +349,10 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de inscripción'),
                 'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de modificación'),
                 'estado': openapi.Schema(type=openapi.TYPE_STRING, description='Estado'),
-                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='Especialidad'),
                 'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='Centro Asistencial'),
                 'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Tipo de profesional'),
+                'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo de profesional'),
+                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='Especialidad'),
                 'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='Plaza'),
                 'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='Entidad'),
                 'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='Universidad de procedencia'),

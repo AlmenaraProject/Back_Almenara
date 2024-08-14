@@ -22,6 +22,7 @@ routers.register(r'curso', CursoViewSet)
 routers.register(r'profesor', ProfesorViewSet)
 routers.register(r'postulacion', PostulacionViewSet)
 routers.register(r'usuario', UsuarioViewSet)
+routers.register(r'grupo-profesional', GrupoProfesionalViewSet)
 
 
 urlpatterns = [

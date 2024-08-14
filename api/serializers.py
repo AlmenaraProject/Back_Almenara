@@ -90,6 +90,11 @@ class PostulacionSerializer(serializers.ModelSerializer):
         model = Postulacion
         fields = '__all__'
 
+class GrupoProfesionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grupo_profesional
+        fields = '__all__'
+
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     password = serializers.CharField(

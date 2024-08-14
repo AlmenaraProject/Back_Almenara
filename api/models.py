@@ -9,7 +9,7 @@ class Persona(models.Model):
     apellido = models.CharField(max_length=100)
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
-    direccion = models.CharField(max_length=200)
+    direccion = models.CharField(max_length=200, null=True)
     numero_documento = models.CharField(max_length=20)
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
     def __str__(self):
@@ -79,18 +79,6 @@ class Profesor(models.Model):
         self.nombre = self.nombre.upper()
         self.apellido = self.apellido.upper()
         super(Profesor, self).save(*args, **kwargs)
-    
-class Especialidad(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombre = models.CharField(max_length=100)
-    coordinador = models.ForeignKey('Coordinador',on_delete=models.CASCADE, null=True)
-    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
-    estado = models.BooleanField(default=True)
-    def __str__(self):
-        return self.nombre
-    def save(self , *args, **kwargs):
-        self.nombre = self.nombre.upper()
-        super(Especialidad, self).save(*args, **kwargs)
     
 class Universidad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -163,16 +151,39 @@ class Tipo_profesional(models.Model):
         self.nombre = self.nombre.upper()
         super(Tipo_profesional, self).save(*args, **kwargs)
 
+class Grupo_profesional(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Grupo_profesional, self).save(*args, **kwargs)
+
+class Especialidad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=150)
+    grupo_profesional = models.ForeignKey('Grupo_profesional', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Especialidad, self).save(*args, **kwargs)
+        
 class Profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
     CMP = models.CharField(max_length=20)
-    especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
     plaza = models.ForeignKey('Plaza', on_delete=models.CASCADE)
     entidad = models.ForeignKey('Entidad', on_delete=models.CASCADE)
     centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
     universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
     tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
+    grupo_profesional = models.ForeignKey('Grupo_profesional', on_delete=models.CASCADE)
+    especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
     fecha_inscripcion = models.DateField(auto_now_add=True)
     fecha_modificacion = models.DateField(auto_now=True)
