@@ -187,11 +187,22 @@ class Profesional(models.Model):
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
     fecha_inscripcion = models.DateField(auto_now_add=True)
     fecha_modificacion = models.DateField(auto_now=True)
+    nivel = models.ForeignKey('Nivel', on_delete=models.CASCADE)
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
     is_postgraduado = models.BooleanField(default=False)
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.persona.nombre + ' ' + self.persona.apellido
+
+class Nivel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Nivel, self).save(*args, **kwargs)
 
 class Plan_trabajo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
