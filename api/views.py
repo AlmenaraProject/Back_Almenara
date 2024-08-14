@@ -91,6 +91,10 @@ class GrupoProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Grupo_profesional.objects.all()
     serializer_class = GrupoProfesionalSerializer
 
+class NivelViewSet(viewsets.ModelViewSet):
+    queryset = Nivel.objects.all()
+    serializer_class = NivelSerializer
+
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer

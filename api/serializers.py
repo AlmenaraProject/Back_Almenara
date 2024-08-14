@@ -95,6 +95,11 @@ class GrupoProfesionalSerializer(serializers.ModelSerializer):
         model = Grupo_profesional
         fields = '__all__'
 
+class NivelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nivel
+        fields = '__all__'
+
 class SignupSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     password = serializers.CharField(
