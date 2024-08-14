@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 import pandas as pd
-from .models import Profesional, Persona, TipoDocumento, Especialidad, Plaza, Entidad, Centro_Asistencial, Universidad, Tipo_profesional, Plan_trabajo, Usuario
+from .models import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -59,7 +59,9 @@ class ImportProfesionalView(View):
                 universidad = get_object_or_404(Universidad, nombre=row['UNIVERSIDAD_NOMBRE'])
                 tipo_profesional = get_object_or_404(Tipo_profesional, nombre=row['TIPO_PROFESIONAL_NOMBRE'])
                 plan_trabajo = get_object_or_404(Plan_trabajo, nombre=row['PLAN_TRABAJO_NOMBRE'])
-
+                grupo_profesional = get_object_or_404(Grupo_profesional, nombre=row['GRUPO_PROFESIONAL_NOMBRE'])
+                nivel = get_object_or_404(Nivel, nombre=row['NIVEL_NOMBRE'])
+                
                 datos_validos.append({
                     'persona': {
                         'nombre': row['NOMBRE'],
@@ -72,13 +74,15 @@ class ImportProfesionalView(View):
                     },
                     'profesional': {
                         'CMP': row['CMP'],
-                        'especialidad': especialidad,
                         'plaza': plaza,
                         'entidad': entidad,
                         'centro_Asistencial': centro_asistencial,
                         'universidad_procedencia': universidad,
                         'tipo_profesional': tipo_profesional,
+                        'grupo_profesional': grupo_profesional,
+                        'especialidad': especialidad,
                         'plan_trabajo': plan_trabajo,
+                        'nivel': nivel,
                         'usuario_modificacion': usuario_modificacion,
                         'is_postgraduado': row['IS_POSTGRADUADO'],
                         'estado': row['ESTADO']
