@@ -364,8 +364,10 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='Universidad de procedencia'),
                 'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='Plan de trabajo'),
                 'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Usuario de modificación'),
+                'is_postgraduado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Postgraduado'),
+                'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='Nivel'),
             },
-            required=['persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'especialidad', 'centro_Asistencial', 'tipo_profesional', 'plaza', 'entidad']
+            required=['persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'especialidad', 'centro_Asistencial', 'tipo_profesional', 'plaza', 'entidad', 'universidad_procedencia', 'plan_trabajo', 'usuario_modificacion', 'is_postgraduado', 'nivel'],
         ),
         responses={
             201: openapi.Response('Profesional created successfully', ProfesionalSerializer),
