@@ -327,10 +327,55 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Crear un profesional junto con los datos de la persona",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'persona': openapi.Schema(type=openapi.TYPE_OBJECT, description='Datos de la persona', properties={
+                    'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
+                    'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
+                    'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
+                    'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
+                    'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
+                    'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
+                }),
+                'CMP': openapi.Schema(type=openapi.TYPE_STRING, description='CMP'),
+                'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de inscripción'),
+                'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de modificación'),
+                'estado': openapi.Schema(type=openapi.TYPE_STRING, description='Estado'),
+                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='Especialidad'),
+                'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='Centro Asistencial'),
+                'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Tipo de profesional'),
+                'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='Plaza'),
+                'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='Entidad'),
+                'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='Universidad de procedencia'),
+                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='Plan de trabajo'),
+                'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Usuario de modificación'),
+            },
+            required=['persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'especialidad', 'centro_Asistencial', 'tipo_profesional', 'plaza', 'entidad']
+        ),
+        responses={
+            201: openapi.Response('Profesional created successfully', ProfesionalSerializer),
+            400: "Invalid data",
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        persona_data = request.data.get('persona')
+        profesional_data = request.data
 
-
-
-
-
+        persona_serializer = PersonaSerializer(data=persona_data)
+        if persona_serializer.is_valid():
+            persona = persona_serializer.save()
+            profesional_data['persona'] = persona.id
+            profesional_serializer = ProfesionalSerializer(data=profesional_data)
+            if profesional_serializer.is_valid():
+                profesional_serializer.save()
+                return Response(profesional_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                persona.delete()  # Rollback persona creation if profesional data is invalid
+                return Response(profesional_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

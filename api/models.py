@@ -168,7 +168,7 @@ class Profesional(models.Model):
     persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
     CMP = models.CharField(max_length=20)
     especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
-    plaza = models.OneToOneField('Plaza', on_delete=models.CASCADE)
+    plaza = models.ForeignKey('Plaza', on_delete=models.CASCADE)
     entidad = models.ForeignKey('Entidad', on_delete=models.CASCADE)
     centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
     universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
