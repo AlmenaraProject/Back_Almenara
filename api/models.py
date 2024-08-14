@@ -181,9 +181,6 @@ class Profesional(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.persona.nombre + ' ' + self.persona.apellido
-    def save(self , *args, **kwargs):
-        self.CMP = self.CMP.upper()
-        super(Profesional, self).save(*args, **kwargs)
 
 class Plan_trabajo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
