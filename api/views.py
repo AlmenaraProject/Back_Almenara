@@ -36,6 +36,8 @@ class UniversidadFilter(django_filters.FilterSet):
         model = Universidad
         fields = ['nombre','estado','coordinador','siglas','ciudad']
 
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 class UniversidadViewSet(viewsets.ModelViewSet):
     queryset = Universidad.objects.all().order_by('id')
     serializer_class = UniversidadSerializer
