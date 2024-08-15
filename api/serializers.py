@@ -61,7 +61,7 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
 class ProfesionalSerializer(serializers.ModelSerializer):
-    persona = PersonaSerializer()
+    persona = serializers.PrimaryKeyRelatedField(queryset=Persona.objects.all())
     class Meta:
         model = Profesional
         fields = '__all__'
