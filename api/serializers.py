@@ -88,6 +88,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         representation['especialidad'] = EspecialidadSerializer(instance.especialidad).data
         representation['plan_trabajo'] = PlanTrabajoSerializer(instance.plan_trabajo).data
         representation['nivel'] = NivelSerializer(instance.nivel).data
+        
         return representation
 
 class PlanTrabajoSerializer(serializers.ModelSerializer):
