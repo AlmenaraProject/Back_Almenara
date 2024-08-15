@@ -62,9 +62,15 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
     
 class ProfesionalSerializer(serializers.ModelSerializer):
     persona = serializers.PrimaryKeyRelatedField(queryset=Persona.objects.all())
+
     class Meta:
         model = Profesional
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['persona'] = PersonaSerializer(instance.persona).data
+        return representation
 
 class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
