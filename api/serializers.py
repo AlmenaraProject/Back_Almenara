@@ -61,16 +61,27 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
 class ProfesionalSerializer(serializers.ModelSerializer):
-    persona = serializers.PrimaryKeyRelatedField(queryset=Persona.objects.all())
+    persona = PersonaSerializer()
 
     class Meta:
         model = Profesional
         fields = '__all__'
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['persona'] = PersonaSerializer(instance.persona).data
-        return representation
+    def create(self, validated_data):
+        persona_data = validated_data.pop('persona')
+        persona = Persona.objects.create(**persona_data)
+        profesional = Profesional.objects.create(
+            persona=persona,
+            tipo_profesional=validated_data['tipo_profesional'],
+            especialidad=validated_data['especialidad'],
+            universidad=validated_data['universidad'],
+            fecha_graduacion=validated_data['fecha_graduacion'],
+            nro_colegiatura=validated_data['nro_colegiatura'],
+            fecha_colegiatura=validated_data['fecha_colegiatura'],
+            estado=validated_data['estado']
+        )
+        profesional.save()
+        return profesional
 
 class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
