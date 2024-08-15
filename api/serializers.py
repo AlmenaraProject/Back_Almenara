@@ -62,16 +62,7 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
     
 class ProfesionalSerializer(serializers.ModelSerializer):
     persona = serializers.PrimaryKeyRelatedField(queryset=Persona.objects.all())
-    plaza = serializers.PrimaryKeyRelatedField(queryset=Plaza.objects.all())
-    entidad = serializers.PrimaryKeyRelatedField(queryset=Entidad.objects.all())
-    centro_asistencial = serializers.PrimaryKeyRelatedField(queryset=Centro_Asistencial.objects.all())
-    universidad_procedencia = serializers.PrimaryKeyRelatedField(queryset=Universidad.objects.all())
-    tipo_profesional = serializers.PrimaryKeyRelatedField(queryset=Tipo_profesional.objects.all())
-    grupo_profesional = serializers.PrimaryKeyRelatedField(queryset=Grupo_profesional.objects.all())
-    especialidad = serializers.PrimaryKeyRelatedField(queryset=Especialidad.objects.all())
-    plan_trabajo = serializers.PrimaryKeyRelatedField(queryset=Plan_trabajo.objects.all())
-    nivel = serializers.PrimaryKeyRelatedField(queryset=Nivel.objects.all())
-    
+
     class Meta:
         model = Profesional
         fields = '__all__'
@@ -79,16 +70,6 @@ class ProfesionalSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['persona'] = PersonaSerializer(instance.persona).data
-        representation['plaza'] = PlazaSerializer(instance.plaza).data
-        representation['entidad'] = EntidadSerializer(instance.entidad).data
-        representation['centro_asistencial'] = CentroAsistencialSerializer(instance.centro_asistencial).data
-        representation['universidad_procedencia'] = UniversidadSerializer(instance.universidad).data
-        representation['tipo_profesional'] = TipoProfesionalSerializer(instance.tipo_profesional).data
-        representation['grupo_profesional'] = GrupoProfesionalSerializer(instance.grupo_profesional).data
-        representation['especialidad'] = EspecialidadSerializer(instance.especialidad).data
-        representation['plan_trabajo'] = PlanTrabajoSerializer(instance.plan_trabajo).data
-        representation['nivel'] = NivelSerializer(instance.nivel).data
-        
         return representation
 
 class PlanTrabajoSerializer(serializers.ModelSerializer):
