@@ -65,7 +65,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
     plaza = serializers.PrimaryKeyRelatedField(queryset=Plaza.objects.all())
     entidad = serializers.PrimaryKeyRelatedField(queryset=Entidad.objects.all())
     centro_asistencial = serializers.PrimaryKeyRelatedField(queryset=Centro_Asistencial.objects.all())
-    universidad = serializers.PrimaryKeyRelatedField(queryset=Universidad.objects.all())
+    universidad_procedencia = serializers.PrimaryKeyRelatedField(queryset=Universidad.objects.all())
     tipo_profesional = serializers.PrimaryKeyRelatedField(queryset=Tipo_profesional.objects.all())
     grupo_profesional = serializers.PrimaryKeyRelatedField(queryset=Grupo_profesional.objects.all())
     especialidad = serializers.PrimaryKeyRelatedField(queryset=Especialidad.objects.all())
@@ -82,7 +82,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         representation['plaza'] = PlazaSerializer(instance.plaza).data
         representation['entidad'] = EntidadSerializer(instance.entidad).data
         representation['centro_asistencial'] = CentroAsistencialSerializer(instance.centro_asistencial).data
-        representation['universidad'] = UniversidadSerializer(instance.universidad).data
+        representation['universidad_procedencia'] = UniversidadSerializer(instance.universidad).data
         representation['tipo_profesional'] = TipoProfesionalSerializer(instance.tipo_profesional).data
         representation['grupo_profesional'] = GrupoProfesionalSerializer(instance.grupo_profesional).data
         representation['especialidad'] = EspecialidadSerializer(instance.especialidad).data
