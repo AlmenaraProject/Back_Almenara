@@ -72,11 +72,26 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         model = Profesional
         fields = '__all__'
 
+    def validate(self, data):
+        fecha_fin = data.get('fecha_fin')
+        fecha_inscripcion = data.get('fecha_inscripcion')
+        
+        if not fecha_fin or not fecha_inscripcion:
+            raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inscripcion' son obligatorios.")
+        
+        if fecha_fin <= fecha_inscripcion:
+            raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
+        
+        return data
+
     def create(self, validated_data):
         persona_data = validated_data.pop('persona')
         persona = Persona.objects.create(**persona_data)
-        duracion = validated_data['fecha_fin'] - validated_data['fecha_inscripcion']
-        duracion = duracion.days
+        
+        fecha_fin = validated_data['fecha_fin']
+        fecha_inscripcion = validated_data['fecha_inscripcion']
+        duracion = (fecha_fin - fecha_inscripcion).days
+        
         profesional = Profesional.objects.create(
             persona=persona,
             CMP=validated_data['CMP'],
@@ -87,13 +102,14 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             centro_Asistencial=validated_data['centro_Asistencial'],
             plaza=validated_data['plaza'],
             grupo_profesional=validated_data['grupo_profesional'],
-            fecha_fin=validated_data['fecha_fin'],
+            fecha_inscripcion=fecha_inscripcion,
+            fecha_fin=fecha_fin,
             duracion=duracion,
-            sede_Adjudicacion=validated_data['sede_Adjudicacion'], 
+            sede_adjudicacion=validated_data['sede_adjudicacion'], 
             gerencia_dependencia=validated_data['gerencia_dependencia'],
             nivel=validated_data['nivel'],
             entidad=validated_data['entidad'],
-            plan_trabajo = validated_data['plan_trabajo'],
+            plan_trabajo=validated_data['plan_trabajo'],
             universidad_procedencia=validated_data['universidad_procedencia'],
             usuario_modificacion=validated_data['usuario_modificacion'],
         )

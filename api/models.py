@@ -176,7 +176,7 @@ class Especialidad(models.Model):
 class Profesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
-    CMP = models.CharField(max_length=20)
+    CMP = models.CharField(max_length=20, null=True)
     plaza = models.ForeignKey('Plaza', on_delete=models.CASCADE)
     entidad = models.ForeignKey('Entidad', on_delete=models.CASCADE)
     centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
@@ -186,7 +186,7 @@ class Profesional(models.Model):
     especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
     sede_adjudicacion = models.ForeignKey('Sede_Adjudicacion', on_delete=models.CASCADE)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
-    fecha_inscripcion = models.DateField(auto_now_add=True)
+    fecha_inscripcion = models.DateField()
     fecha_fin = models.DateField()
     duracion = models.IntegerField(null=True)
     gerencia_dependencia = models.ForeignKey('Gerencia_dependencia', on_delete=models.CASCADE)
