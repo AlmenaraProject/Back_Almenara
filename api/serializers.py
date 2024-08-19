@@ -75,6 +75,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         persona_data = validated_data.pop('persona')
         persona = Persona.objects.create(**persona_data)
+        duracion = validated_data['fecha_fin'] - validated_data['fecha_inscripcion']
         profesional = Profesional.objects.create(
             persona=persona,
             CMP=validated_data['CMP'],
@@ -86,7 +87,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             plaza=validated_data['plaza'],
             grupo_profesional=validated_data['grupo_profesional'],
             fecha_fin=validated_data['fecha_fin'],
-            duracion=validated_data['duracion'],
+            duracion=duracion,
             sede_Adjudicacion=validated_data['sede_Adjudicacion'], 
             gerencia_dependencia=validated_data['gerencia_dependencia'],
             nivel=validated_data['nivel'],
