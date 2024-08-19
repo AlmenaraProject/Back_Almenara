@@ -82,9 +82,6 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         if fecha_fin <= fecha_inscripcion:
             raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
         
-        return data
-    
-    def validate(self, data):
         errors = {}
         required_fields = [
             'CMP', 'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
