@@ -184,8 +184,12 @@ class Profesional(models.Model):
     tipo_profesional = models.ForeignKey('Tipo_profesional', on_delete=models.CASCADE)
     grupo_profesional = models.ForeignKey('Grupo_profesional', on_delete=models.CASCADE)
     especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)
+    sede_adjudicacion = models.ForeignKey('Sede_Adjudicacion', on_delete=models.CASCADE)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
     fecha_inscripcion = models.DateField(auto_now_add=True)
+    fecha_fin = models.DateField()
+    duracion = models.IntegerField()
+    gerencia_dependencia = models.ForeignKey('Gerencia_dependencia', on_delete=models.CASCADE)
     fecha_modificacion = models.DateField(auto_now=True)
     nivel = models.ForeignKey('Nivel', on_delete=models.CASCADE)
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
@@ -193,6 +197,16 @@ class Profesional(models.Model):
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.persona.nombre + ' ' + self.persona.apellido
+    
+class Gerencia_dependencia(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Gerencia_dependencia, self).save(*args, **kwargs)
 
 class Nivel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

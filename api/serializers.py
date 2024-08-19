@@ -59,6 +59,11 @@ class TipoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tipo_profesional
         fields = '__all__'
+  
+class GerenDependenciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gerencia_dependencia
+        fields = '__all__'  
     
 class ProfesionalSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
@@ -80,6 +85,10 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             centro_Asistencial=validated_data['centro_Asistencial'],
             plaza=validated_data['plaza'],
             grupo_profesional=validated_data['grupo_profesional'],
+            fecha_fin=validated_data['fecha_fin'],
+            duracion=validated_data['duracion'],
+            sede_Adjudicacion=validated_data['sede_Adjudicacion'], 
+            gerencia_dependencia=validated_data['gerencia_dependencia'],
             nivel=validated_data['nivel'],
             entidad=validated_data['entidad'],
             plan_trabajo = validated_data['plan_trabajo'],
