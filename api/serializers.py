@@ -83,7 +83,24 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
         
         return data
+    
+    def validate(self, data):
+        errors = {}
+        required_fields = [
+            'CMP', 'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
+            'centro_Asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
+            'fecha_fin', 'nivel', 'entidad', 'plan_trabajo', 'universidad_procedencia',
+            'usuario_modificacion'
+        ]  
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = 'Este campo es obligatorio.'
 
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return data     
+         
     def create(self, validated_data):
         persona_data = validated_data.pop('persona')
         persona = Persona.objects.create(**persona_data)
@@ -105,8 +122,8 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             fecha_inscripcion=fecha_inscripcion,
             fecha_fin=fecha_fin,
             duracion=duracion,
-            sede_adjudicacion=validated_data['sede_adjudicacion'], 
-            gerencia_dependencia=validated_data['gerencia_dependencia'],
+            sede_adjudicacion=validated_data.get('sede_adjudicacion', None),
+            gerencia_dependencia=validated_data.get('gerencia_dependencia', None),
             nivel=validated_data['nivel'],
             entidad=validated_data['entidad'],
             plan_trabajo=validated_data['plan_trabajo'],
