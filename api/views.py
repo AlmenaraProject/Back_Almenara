@@ -97,6 +97,10 @@ class NivelViewSet(viewsets.ModelViewSet):
     queryset = Nivel.objects.all()
     serializer_class = NivelSerializer
 
+class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
+    queryset = Gerencia_dependencia.objects.all()
+    serializer_class = GerenDependenciaSerializer
+
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer

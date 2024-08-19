@@ -188,7 +188,7 @@ class Profesional(models.Model):
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, related_name='profesionales', on_delete=models.CASCADE)  # Cambiado a ForeignKey
     fecha_inscripcion = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField()
-    duracion = models.IntegerField()
+    duracion = models.IntegerField(null=True)
     gerencia_dependencia = models.ForeignKey('Gerencia_dependencia', on_delete=models.CASCADE)
     fecha_modificacion = models.DateField(auto_now=True)
     nivel = models.ForeignKey('Nivel', on_delete=models.CASCADE)
