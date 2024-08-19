@@ -381,7 +381,6 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
         persona_serializer = PersonaSerializer(data=persona_data)
         if persona_serializer.is_valid():
             persona = persona_serializer.save()
-            profesional_data['persona'] = persona.id
             profesional_serializer = ProfesionalSerializer(data=profesional_data)
             if profesional_serializer.is_valid():
                 profesional_serializer.save()

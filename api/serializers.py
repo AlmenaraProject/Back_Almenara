@@ -72,13 +72,18 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         persona = Persona.objects.create(**persona_data)
         profesional = Profesional.objects.create(
             persona=persona,
+            CMP=validated_data['CMP'],
             tipo_profesional=validated_data['tipo_profesional'],
             especialidad=validated_data['especialidad'],
-            universidad=validated_data['universidad'],
-            fecha_graduacion=validated_data['fecha_graduacion'],
-            nro_colegiatura=validated_data['nro_colegiatura'],
-            fecha_colegiatura=validated_data['fecha_colegiatura'],
-            estado=validated_data['estado']
+            estado=validated_data['estado'],
+            is_postgraduado=validated_data['is_postgraduado'],
+            centro_Asistencial=validated_data['centro_Asistencial'],
+            plaza=validated_data['plaza'],
+            grupo_profesional=validated_data['grupo_profesional'],
+            nivel=validated_data['nivel'],
+            entidad=validated_data['entidad'],
+            universidad_procedencia=validated_data['universidad_procedencia'],
+            usuario_modificacion=validated_data['usuario_modificacion'],
         )
         profesional.save()
         return profesional
