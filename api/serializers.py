@@ -76,6 +76,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         persona_data = validated_data.pop('persona')
         persona = Persona.objects.create(**persona_data)
         duracion = validated_data['fecha_fin'] - validated_data['fecha_inscripcion']
+        duracion = duracion.days
         profesional = Profesional.objects.create(
             persona=persona,
             CMP=validated_data['CMP'],
