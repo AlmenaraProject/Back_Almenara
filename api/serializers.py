@@ -84,7 +84,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         
         errors = {}
         required_fields = [
-            'CMP', 'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
+            'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
             'centro_Asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
             'fecha_fin', 'nivel', 'entidad', 'plan_trabajo', 'universidad_procedencia',
             'usuario_modificacion'
@@ -108,7 +108,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         
         profesional = Profesional.objects.create(
             persona=persona,
-            CMP=validated_data['CMP'],
+            CMP=validated_data.get('CMP', None),
             tipo_profesional=validated_data['tipo_profesional'],
             especialidad=validated_data['especialidad'],
             estado=validated_data['estado'],
