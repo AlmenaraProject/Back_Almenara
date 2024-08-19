@@ -12,12 +12,15 @@ class Persona(models.Model):
     direccion = models.CharField(max_length=200, null=True)
     numero_documento = models.CharField(max_length=20)
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
+
     def __str__(self):
         return self.nombre + ' ' + self.apellido
-    def save(self , *args, **kwargs):
+
+    def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper()
         self.apellido = self.apellido.upper()
-        self.direccion = self.direccion.upper()
+        if self.direccion:
+            self.direccion = self.direccion.upper()
         super(Persona, self).save(*args, **kwargs)
  
 class Coordinador(models.Model):
