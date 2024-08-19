@@ -82,6 +82,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             grupo_profesional=validated_data['grupo_profesional'],
             nivel=validated_data['nivel'],
             entidad=validated_data['entidad'],
+            plan_trabajo = validated_data['plan_trabajo'],
             universidad_procedencia=validated_data['universidad_procedencia'],
             usuario_modificacion=validated_data['usuario_modificacion'],
         )
