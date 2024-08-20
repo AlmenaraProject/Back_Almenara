@@ -165,8 +165,51 @@ class FormularioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Formulario
         fields = '__all__'
+
+class RechazarPostulacion(APIView):
+    @swagger_auto_schema(
+        operation_description="Rechazar postulaciones",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'ids_postulacion': openapi.Schema(type=openapi.TYPE_ARRAY, 
+                                                  items=openapi.Schema(type=openapi.TYPE_STRING),
+                                                  description='IDs de las postulaciones'),
+            },
+            required=['ids_postulacion']
+        ),
+        responses={200: "Postulaciones rejected successfully", 400: "Invalid data"},
+    )
+    def post(self, request, *args, **kwargs):
+        ids_postulacion = request.data.get('ids_postulacion')
+        if ids_postulacion is None:
+            return Response({"error": "id_postulacion is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
+        except Postulacion.DoesNotExist:
+            return Response({"error": "Postulacion not found"}, status=status.HTTP_404_NOT_FOUND)
         
-class MigrarFormulario(APIView):
+        # Informar que fue rechazado en un email
+        for postulacion in postulaciones:
+            context = {'nombre': postulacion.nombre,
+                       'apellido': postulacion.apellido,
+                       'correo': postulacion.correo,}
+            email_body = render_to_string('register/reject_email.html', context)
+            email = EmailMessage(
+                'Rechazo de postulación',
+                email_body,
+                'testalmenara@gmail.com',
+                [postulacion.correo],
+            )
+            email.content_subtype = 'html'
+            email.send()
+            
+        postulaciones.delete()
+        
+        return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
+    
+        
+class AceptarPostulacion(APIView):
     @swagger_auto_schema(
         operation_description="Migrar postulaciones a un curso",
         request_body=openapi.Schema(
