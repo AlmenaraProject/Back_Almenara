@@ -281,11 +281,10 @@ class Postulacion(models.Model):
     regimen_laboral = models.CharField(max_length=100)
     cargo = models.CharField(max_length=100)
     codigo_planilla = models.CharField(max_length=100)
-    plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
-    fecha_postulacion = models.DateField()
+    fecha_postulacion = models.DateField(auto_now=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
-        return self.nombre + ' ' + self.apellido + ' ' + self.plan_trabajo.nombre + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
+        return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
 
 class Formulario(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

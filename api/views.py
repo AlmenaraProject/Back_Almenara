@@ -124,7 +124,7 @@ class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
 class PostulacionFilter(django_filters.FilterSet):
     class Meta:
         model = Postulacion
-        fields = ['plan_trabajo','fecha_postulacion','estado']
+        fields = ['fecha_postulacion','estado']
         
 class PostulacionViewSet(viewsets.ModelViewSet):
     queryset = Postulacion.objects.all()
@@ -133,7 +133,6 @@ class PostulacionViewSet(viewsets.ModelViewSet):
     filterset_class = PostulacionFilter
     @swagger_auto_schema(manual_parameters=[
         openapi.Parameter('profesional', openapi.IN_QUERY, description="Profesional", type=openapi.TYPE_STRING),
-        openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_postulacion', openapi.IN_QUERY, description="Fecha de postulación", type=openapi.TYPE_STRING),
         openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
     ])
@@ -166,6 +165,64 @@ class FormularioSerializer(serializers.ModelSerializer):
         model = Formulario
         fields = '__all__'
 
+class EnviarPostulacion(APIView):
+    @swagger_auto_schema(
+        operation_description="Agregar postulaciones a un formulario",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'formulario_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID del formulario'),
+                'postulacion': openapi.Schema(type=openapi.TYPE_OBJECT, description='Datos de la postulación', properties={
+                    'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del postulante'),
+                    'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido del postulante'),
+                    'correo': openapi.Schema(type=openapi.TYPE_STRING, description='Correo del postulante'),
+                    'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono del postulante'),
+                    'profesion': openapi.Schema(type=openapi.TYPE_STRING, description='Profesión del postulante'),
+                    'regimen_laboral': openapi.Schema(type=openapi.TYPE_STRING, description='Regimen laboral del postulante'),
+                    'cargo': openapi.Schema(type=openapi.TYPE_STRING, description='Cargo del postulante'),
+                    'codigo_planilla': openapi.Schema(type=openapi.TYPE_STRING, description='Código de planilla del postulante'),
+                    'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento del postulante'),
+                }),
+            },
+            required=['formulario_id', 'postulacion']
+        ),
+        responses={200: "Postulacion added successfully", 400: "Invalid data"},
+    )
+    def post(self, request, *args, **kwargs):
+        formulario_id = request.data.get('formulario_id')
+        postulacion_data = request.data.get('postulacion')
+
+        if not formulario_id or not postulacion_data:
+            return Response({"error": "Formulario ID and Postulacion data are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            formulario = Formulario.objects.get(id=formulario_id)
+        except Formulario.DoesNotExist:
+            return Response({"error": "Formulario not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        postulacion_serializer = PostulacionSerializer(data=postulacion_data)
+        if postulacion_serializer.is_valid():
+            postulacion = postulacion_serializer.save()
+            formulario.postulacion.add(postulacion)
+            formulario.save()
+            # Informar que fue agregado en un email
+            context = {'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
+                       'correo': postulacion.correo, 
+                       'curso': formulario.curso.nombre}
+            email_body = render_to_string('register/sendform_email.html', context)
+            email = EmailMessage(
+                'Postulación agregada',
+                email_body,
+                'testalmenara@gmail.com',
+                [postulacion.correo],
+            )
+            email.content_subtype = 'html'
+            email.send()
+            return Response({"message": "Postulacion added successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response(postulacion_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class RechazarPostulacion(APIView):
     @swagger_auto_schema(
         operation_description="Rechazar postulaciones",
@@ -175,6 +232,7 @@ class RechazarPostulacion(APIView):
                 'ids_postulacion': openapi.Schema(type=openapi.TYPE_ARRAY, 
                                                   items=openapi.Schema(type=openapi.TYPE_STRING),
                                                   description='IDs de las postulaciones'),
+                'id_curso': openapi.Schema(type=openapi.TYPE_STRING, description='ID del curso'),
             },
             required=['ids_postulacion']
         ),
@@ -182,8 +240,11 @@ class RechazarPostulacion(APIView):
     )
     def post(self, request, *args, **kwargs):
         ids_postulacion = request.data.get('ids_postulacion')
+        id_curso = request.data.get('id_curso')
         if ids_postulacion is None:
             return Response({"error": "id_postulacion is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if id_curso is None:
+            return Response({"error": "id_curso is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
         except Postulacion.DoesNotExist:
@@ -191,9 +252,11 @@ class RechazarPostulacion(APIView):
         
         # Informar que fue rechazado en un email
         for postulacion in postulaciones:
+            curso = Curso.objects.get(id=id_curso)
             context = {'nombre': postulacion.nombre,
                        'apellido': postulacion.apellido,
-                       'correo': postulacion.correo,}
+                       'correo': postulacion.correo,
+                       'curso': curso.nombre}
             email_body = render_to_string('register/reject_email.html', context)
             email = EmailMessage(
                 'Rechazo de postulación',
@@ -247,7 +310,11 @@ class AceptarPostulacion(APIView):
         
         #Informar que fue aceptado en un email
         for postulacion in postulaciones:
-            context = {'curso': curso.nombre, 'fecha_inicio': curso.fecha_inicio, 'fecha_fin': curso.fecha_fin, 'correo': postulacion.correo, 'nombre': postulacion.nombre}
+            context = {'curso': curso.nombre, 
+                       'fecha_inicio': curso.fecha_inicio, 
+                       'fecha_inicio': curso.fecha_fin, 
+                       'correo': postulacion.correo, 
+                       'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido}
             email_body = render_to_string('register/course_confirmation_email.html', context)
             email = EmailMessage(
                 'Confirmación de postulación',
