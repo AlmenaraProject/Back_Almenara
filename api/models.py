@@ -52,7 +52,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=100)
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE)
-    estado = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
  
     USERNAME_FIELD = 'email'
     
@@ -271,9 +271,29 @@ class Curso(models.Model):
 
 class Postulacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    profesional = models.ForeignKey('Profesional', on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    profesion = models.CharField(max_length=100)
+    documento = models.CharField(max_length=250, null=True)
+    tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
+    correo = models.EmailField()
+    telefono = models.CharField(max_length=20)
+    regimen_laboral = models.CharField(max_length=100)
+    cargo = models.CharField(max_length=100)
+    codigo_planilla = models.CharField(max_length=100)
     plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
     fecha_postulacion = models.DateField()
     estado = models.BooleanField(default=True)
     def __str__(self):
-        return self.profesional.persona.nombre + ' ' + self.profesional.persona.apellido + ' ' + self.plan_trabajo.nombre + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
+        return self.nombre + ' ' + self.apellido + ' ' + self.plan_trabajo.nombre + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
+
+class Formulario(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    curso = models.ForeignKey('Curso', on_delete=models.CASCADE)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    postulacion = models.ManyToManyField('Postulacion', blank=True)
+    fecha_modificacion = models.DateField(auto_now=True)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre + ' ' + self.fecha_creacion.strftime('%d/%m/%Y') + ' ' + self.fecha_modificacion.strftime('%d/%m/%Y')

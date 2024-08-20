@@ -17,6 +17,7 @@ from django.contrib.auth import get_user_model
 import django_filters
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.forms import PasswordResetForm
 # Create your views here.
 
 class RolViewSet(viewsets.ModelViewSet):
@@ -101,6 +102,10 @@ class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
     queryset = Gerencia_dependencia.objects.all()
     serializer_class = GerenDependenciaSerializer
 
+class FormularioViewSet(viewsets.ModelViewSet):
+    queryset = Formulario.objects.all()
+    serializer_class = FormularioSerializer
+
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -119,7 +124,7 @@ class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
 class PostulacionFilter(django_filters.FilterSet):
     class Meta:
         model = Postulacion
-        fields = ['profesional','plan_trabajo','fecha_postulacion','estado']
+        fields = ['plan_trabajo','fecha_postulacion','estado']
         
 class PostulacionViewSet(viewsets.ModelViewSet):
     queryset = Postulacion.objects.all()
@@ -156,7 +161,62 @@ class CursoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-   
+class FormularioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Formulario
+        fields = '__all__'
+        
+class MigrarFormulario(APIView):
+    @swagger_auto_schema(
+        operation_description="Migrar postulaciones a un curso",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id_curso': openapi.Schema(type=openapi.TYPE_STRING, description='ID del curso'),
+                'ids_postulacion': openapi.Schema(type=openapi.TYPE_ARRAY, 
+                                                  items=openapi.Schema(type=openapi.TYPE_STRING),
+                                                  description='IDs de las postulaciones'),
+            },
+            required=['id_curso', 'ids_postulacion']
+        ),
+        responses={200: "Postulaciones migrated successfully", 400: "Invalid data"},
+    )
+    def post(self, request, *args, **kwargs):
+        id_curso = request.data.get('id_curso')
+        ids_postulacion = request.data.get('ids_postulacion')
+
+        if id_curso is None or ids_postulacion is None:
+            return Response({"error": "id_curso and ids_postulacion are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            curso = Curso.objects.get(id=id_curso)
+        except Curso.DoesNotExist:
+            return Response({"error": "Curso not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
+        if not postulaciones.exists():
+            return Response({"error": "No valid postulaciones found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        postulaciones.update(estado=True)
+        
+        curso.postulacion.add(*postulaciones)
+        curso.save()
+        
+        #Informar que fue aceptado en un email
+        for postulacion in postulaciones:
+            context = {'curso': curso.nombre, 'fecha_inicio': curso.fecha_inicio, 'fecha_fin': curso.fecha_fin, 'correo': postulacion.correo, 'nombre': postulacion.nombre}
+            email_body = render_to_string('register/course_confirmation_email.html', context)
+            email = EmailMessage(
+                'Confirmación de postulación',
+                email_body,
+                'testalmenara@gmail.com',
+                [postulacion.correo],
+            )
+            email.content_subtype = 'html'
+            email.send()
+
+        return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)
+
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",
@@ -204,6 +264,20 @@ class SingnupView(APIView):
                 )
                 
                 token = Token.objects.create(user=user)
+                # Renderizar la plantilla de correo electrónico con el contexto
+                context = {'email': user.email}
+                email_body = render_to_string(
+                    'register/confirmation_email.html', context)
+
+                # Enviar correo de confirmación
+                email = EmailMessage(
+                    'Confirmación de registro',
+                    email_body,
+                    'testalmenara@gmail.com',
+                    [user.email],
+                )
+                email.content_subtype = 'html'  # Establecer el contenido como HTML
+                email.send()
                 return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -397,5 +471,33 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 persona.delete()  # Rollback persona creation if profesional data is invalid
                 return Response(profesional_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
+class PasswordResetView(APIView):
+    @swagger_auto_schema(
+        operation_description="Enviar correo electrónico de restablecimiento de contraseña",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
+            },
+            required=['email']
+        ),
+        responses={
+            200: "Password reset email sent.",
+            400: "Invalid data",
+        },
+    )
+    def post(self, request):
+        form = PasswordResetForm(request.data)
+        if form.is_valid():
+            opts = {
+                'use_https': request.is_secure(),
+                'from_email': 'testalmenara@gmail.com',
+                'request': request,
+                'html_email_template_name': 'recover/password_reset_email.html',
+                'extra_email_context': {'host': request.get_host()}
+            }
+            form.save(**opts)
+            return Response("Password reset email sent.", status=status.HTTP_200_OK)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 

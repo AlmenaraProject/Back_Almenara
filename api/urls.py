@@ -1,6 +1,6 @@
 from django.urls import path, include, re_path
 from rest_framework import routers
-
+from django.contrib.auth import views as auth_views
 from api.views import *
 from api.importviews import *
 routers = routers.DefaultRouter()
@@ -25,13 +25,18 @@ routers.register(r'usuario', UsuarioViewSet)
 routers.register(r'grupo-profesional', GrupoProfesionalViewSet)
 routers.register(r'nivel', NivelViewSet)
 routers.register(r'gerencia-dependencia', GerenciaDependenciaViewSet)
+routers.register(r'formulario', FormularioViewSet)
 
 
 urlpatterns = [
     path('', include(routers.urls)),
+    path('migrar/', MigrarFormulario.as_view(), name='migrar'),
     path('signup/', SingnupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('user-details/', UserDetails.as_view(), name='UserDetails'),
     path('logout/', logout, name='logout'),
     path('import-profesional/', ImportProfesionalView.as_view(), name='import'),
+    path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='recover/password_reset_form.html'), name='password_reset_confirm'),
 ]

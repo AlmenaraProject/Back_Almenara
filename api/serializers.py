@@ -21,10 +21,9 @@ class TipoDocumentoSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     rol = RolSerializer()
-
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'persona', 'rol', 'estado', 'last_login']
+        fields = ['id', 'email', 'persona', 'rol', 'is_active', 'last_login']
 
 class UniversidadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -154,6 +153,12 @@ class PostulacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Postulacion
         fields = '__all__'
+        
+class FormularioSerializer(serializers.ModelSerializer):
+    curso = CursoSerializer()
+    class Meta:
+        model = Formulario
+        fields = '__all__'
 
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
@@ -189,7 +194,6 @@ class SignupSerializer(serializers.ModelSerializer):
     
 class LoginSerializer(serializers.ModelSerializer):
     rol = RolSerializer(read_only=True)
-
     class Meta:
         model = Usuario
         fields = ['id', 'email', 'persona', 'rol']
