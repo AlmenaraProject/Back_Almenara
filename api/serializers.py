@@ -193,7 +193,7 @@ class FormularioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Formulario
-        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso']
+        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
     
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
