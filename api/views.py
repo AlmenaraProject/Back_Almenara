@@ -104,7 +104,13 @@ class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
 
 class FormularioViewSet(viewsets.ModelViewSet):
     queryset = Formulario.objects.all()
-
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del formulario", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado del formulario", type=openapi.TYPE_STRING),
+        openapi.Parameter('curso', openapi.IN_QUERY, description="Curso", type=openapi.TYPE_STRING),
+    ])    
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return FormularioCreateSerializer
