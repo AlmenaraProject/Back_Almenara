@@ -105,7 +105,29 @@ class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
 class FormularioViewSet(viewsets.ModelViewSet):
     queryset = Formulario.objects.all()
     serializer_class = FormularioSerializer
-
+    
+    @swagger_auto_schema(manual_parameters=
+                            [openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del formulario", type=openapi.TYPE_STRING),
+                            openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
+                            openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
+                            openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+                            openapi.Parameter('curso', openapi.IN_QUERY, description="Curso", type=openapi.TYPE_STRING),
+                            openapi.Parameter('profesor', openapi.IN_QUERY, description="Profesor", type=openapi.TYPE_STRING),
+                            openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
+                            openapi.Parameter('usuario_modificacion', openapi.IN_QUERY, description="Usuario de modificación", type=openapi.TYPE_STRING),
+                            openapi.Parameter('is_postgraduado', openapi.IN_QUERY, description="Postgraduado", type=openapi.TYPE_BOOLEAN),
+                            openapi.Parameter('nivel', openapi.IN_QUERY, description="Nivel", type=openapi.TYPE_STRING),
+                            ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def create(self, request, *args, **kwargs):
+        serializer = FormularioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -159,11 +181,6 @@ class CursoViewSet(viewsets.ModelViewSet):
     ])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-class FormularioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Formulario
-        fields = '__all__'
 
 class EnviarPostulacion(APIView):
     @swagger_auto_schema(

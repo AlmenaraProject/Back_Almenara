@@ -1,3 +1,4 @@
+import datetime
 from api.models import *
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
@@ -156,10 +157,62 @@ class PostulacionSerializer(serializers.ModelSerializer):
         
 class FormularioSerializer(serializers.ModelSerializer):
     curso = CursoSerializer()
+
     class Meta:
         model = Formulario
         fields = '__all__'
 
+    def validate(self, data):
+        fecha_fin = data.get('fecha_fin')
+        fecha_inicio = data.get('fecha_inicio')
+        if not fecha_fin or not fecha_inicio:
+            raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inicio' son obligatorios.")
+        
+        if fecha_fin <= fecha_inicio:
+            raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inicio'.")
+        
+        errors = {}
+        required_fields = ['fecha_inicio', 'fecha_fin', 'estado', 'curso']
+        
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = 'Este campo es obligatorio.'
+        
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return data
+
+    def create(self, validated_data):
+        curso_data = validated_data.pop('curso')
+        curso = Curso.objects.create(**curso_data)
+        
+        formulario = Formulario.objects.create(
+            fecha_inicio=validated_data['fecha_inicio'],
+            fecha_fin=validated_data['fecha_fin'],
+            estado=validated_data['estado'],
+            curso=curso,
+        )
+        formulario.save()
+        return formulario
+    
+    def update(self, instance, validated_data):
+        instance.fecha_inicio = validated_data.get('fecha_inicio', instance.fecha_inicio)
+        instance.fecha_fin = validated_data.get('fecha_fin', instance.fecha_fin)
+        instance.estado = validated_data.get('estado', instance.estado)
+        
+        curso_data = validated_data.get('curso')
+        if curso_data:
+            curso = Curso.objects.create(**curso_data)
+            instance.curso = curso
+        
+        postulacion_data = validated_data.get('postulacion')
+        if postulacion_data:
+            instance.postulacion.set(postulacion_data)
+        
+        instance.save()
+        return instance
+    
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grupo_profesional
