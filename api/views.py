@@ -125,6 +125,24 @@ class FormularioViewSet(viewsets.ModelViewSet):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
     
+    @action(detail=False, methods=['get'], url_path='by-curso')
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('curso_id', openapi.IN_QUERY, description="ID del curso", type=openapi.TYPE_INTEGER)
+    ])
+    def list_by_curso(self, request):
+        curso_id = request.query_params.get('curso_id')
+        if not curso_id:
+            return Response({"detail": "curso_id es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        formularios = self.queryset.filter(curso_id=curso_id)
+        page = self.paginate_queryset(formularios)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(formularios, many=True)
+        return Response(serializer.data)
+    
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer

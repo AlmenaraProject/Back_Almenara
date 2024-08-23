@@ -190,7 +190,6 @@ class FormularioCreateSerializer(serializers.ModelSerializer):
 
 class FormularioSerializer(serializers.ModelSerializer):
     curso = CursoSerializer()
-
     class Meta:
         model = Formulario
         fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
