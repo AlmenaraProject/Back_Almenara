@@ -155,12 +155,12 @@ class PostulacionSerializer(serializers.ModelSerializer):
         model = Postulacion
         fields = '__all__'
         
-class FormularioSerializer(serializers.ModelSerializer):
-    curso = CursoSerializer()
+class FormularioCreateSerializer(serializers.ModelSerializer):
+    curso_id = serializers.PrimaryKeyRelatedField(queryset=Curso.objects.all(), source='curso')
 
     class Meta:
         model = Formulario
-        fields = '__all__'
+        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso_id']
 
     def validate(self, data):
         fecha_fin = data.get('fecha_fin')
@@ -184,34 +184,16 @@ class FormularioSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        curso_data = validated_data.pop('curso')
-        curso = Curso.objects.create(**curso_data)
-        
-        formulario = Formulario.objects.create(
-            fecha_inicio=validated_data['fecha_inicio'],
-            fecha_fin=validated_data['fecha_fin'],
-            estado=validated_data['estado'],
-            curso=curso,
-        )
-        formulario.save()
+        curso = validated_data.pop('curso')
+        formulario = Formulario.objects.create(curso=curso, **validated_data)
         return formulario
-    
-    def update(self, instance, validated_data):
-        instance.fecha_inicio = validated_data.get('fecha_inicio', instance.fecha_inicio)
-        instance.fecha_fin = validated_data.get('fecha_fin', instance.fecha_fin)
-        instance.estado = validated_data.get('estado', instance.estado)
-        
-        curso_data = validated_data.get('curso')
-        if curso_data:
-            curso = Curso.objects.create(**curso_data)
-            instance.curso = curso
-        
-        postulacion_data = validated_data.get('postulacion')
-        if postulacion_data:
-            instance.postulacion.set(postulacion_data)
-        
-        instance.save()
-        return instance
+
+class FormularioSerializer(serializers.ModelSerializer):
+    curso = CursoSerializer()
+
+    class Meta:
+        model = Formulario
+        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso']
     
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
