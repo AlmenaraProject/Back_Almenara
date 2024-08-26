@@ -134,7 +134,12 @@ class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan_trabajo
         fields = '__all__'
-        
+
+class AcuerdoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Acuerdo
+        fields = '__all__'
+
 class CoordinadorSerializer(serializers.ModelSerializer):       
     class Meta:
         model = Coordinador

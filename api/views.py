@@ -82,6 +82,10 @@ class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
     serializer_class = PlanTrabajoSerializer
 
+class AcuerdoViewSet(viewsets.ModelViewSet):
+    queryset = Acuerdo.objects.all()
+    serializer_class = AcuerdoSerializer
+
 class CoordinadorViewSet(viewsets.ModelViewSet):
     queryset = Coordinador.objects.all()
     serializer_class = CoordinadorSerializer
