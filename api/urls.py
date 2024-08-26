@@ -30,9 +30,6 @@ routers.register(r'formulario', FormularioViewSet)
 
 urlpatterns = [
     path('', include(routers.urls)),
-    path('aceptar-postulacion/', AceptarPostulacion.as_view(), name='AceptarPostulacion'),
-    path('rechazar-postulacion/', RechazarPostulacion.as_view(), name='RechazarPostulacion'),
-    path('enviar-postulacion/', EnviarPostulacion.as_view(), name='EnviarPostulacion'),
     path('signup/', SingnupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('user-details/', UserDetails.as_view(), name='UserDetails'),
