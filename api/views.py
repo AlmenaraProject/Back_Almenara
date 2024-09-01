@@ -31,6 +31,18 @@ class TipoDocumentoViewSet(viewsets.ModelViewSet):
 class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
+
+class CargoViewSet(viewsets.ModelViewSet):
+    queryset = Cargo.objects.all()
+    serializer_class = CargoSerializer
+
+class GrupoOcupacionalViewSet(viewsets.ModelViewSet):
+    queryset = Grupo_Ocupacional.objects.all()
+    serializer_class = GrupoOcupacionalSerializer
+
+class EstablecimientoRPAViewSet(viewsets.ModelViewSet):
+    queryset = Establecimiento_RPA.objects.all()
+    serializer_class = EstablecimientoRPASerializer
     
 class UniversidadFilter(django_filters.FilterSet):
     class Meta:
@@ -104,8 +116,48 @@ class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
 
 class FormularioViewSet(viewsets.ModelViewSet):
     queryset = Formulario.objects.all()
+<<<<<<< Updated upstream
     serializer_class = FormularioSerializer
 
+=======
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado del formulario", type=openapi.TYPE_STRING),
+        openapi.Parameter('curso', openapi.IN_QUERY, description="Curso", type=openapi.TYPE_STRING),
+    ])    
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return FormularioCreateSerializer
+        return FormularioSerializer
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado del formulario", type=openapi.TYPE_STRING),
+        openapi.Parameter('curso_id', openapi.IN_QUERY, description="Curso", type=openapi.TYPE_STRING),
+    ])
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+    @action(detail=False, methods=['get'], url_path='by-curso')
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('curso_id', openapi.IN_QUERY, description="ID del curso", type=openapi.TYPE_INTEGER)
+    ])
+    def list_by_curso(self, request):
+        curso_id = request.query_params.get('curso_id')
+        if not curso_id:
+            return Response({"detail": "curso_id es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        formularios = self.queryset.filter(curso_id=curso_id)
+        page = self.paginate_queryset(formularios)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(formularios, many=True)
+        return Response(serializer.data)
+    
+>>>>>>> Stashed changes
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -178,10 +230,13 @@ class EnviarPostulacion(APIView):
                     'correo': openapi.Schema(type=openapi.TYPE_STRING, description='Correo del postulante'),
                     'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono del postulante'),
                     'profesion': openapi.Schema(type=openapi.TYPE_STRING, description='Profesión del postulante'),
+                    'establecimiento_RPA': openapi.Schema(type=openapi.TYPE_STRING, description='Establecimiento RPA del postulante'),
+                    'grupo_ocupacional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo ocupacional del postulante'),
                     'regimen_laboral': openapi.Schema(type=openapi.TYPE_STRING, description='Regimen laboral del postulante'),
                     'cargo': openapi.Schema(type=openapi.TYPE_STRING, description='Cargo del postulante'),
                     'codigo_planilla': openapi.Schema(type=openapi.TYPE_STRING, description='Código de planilla del postulante'),
                     'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento del postulante'),
+                    'documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento del postulante')
                 }),
             },
             required=['formulario_id', 'postulacion']
@@ -191,14 +246,18 @@ class EnviarPostulacion(APIView):
     def post(self, request, *args, **kwargs):
         formulario_id = request.data.get('formulario_id')
         postulacion_data = request.data.get('postulacion')
-
+        
         if not formulario_id or not postulacion_data:
             return Response({"error": "Formulario ID and Postulacion data are required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         try:
             formulario = Formulario.objects.get(id=formulario_id)
         except Formulario.DoesNotExist:
             return Response({"error": "Formulario not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        documento_identidad = postulacion_data.get('documento')
+        if formulario.postulacion.filter(documento=documento_identidad).exists():
+            return Response({"error": "Ya existe una postulación con el mismo documento de identidad en este formulario."}, status=status.HTTP_400_BAD_REQUEST)
 
         postulacion_serializer = PostulacionSerializer(data=postulacion_data)
         if postulacion_serializer.is_valid():
@@ -206,9 +265,11 @@ class EnviarPostulacion(APIView):
             formulario.postulacion.add(postulacion)
             formulario.save()
             # Informar que fue agregado en un email
-            context = {'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
-                       'correo': postulacion.correo, 
-                       'curso': formulario.curso.nombre}
+            context = {
+                'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
+                'correo': postulacion.correo, 
+                'curso': formulario.curso.nombre
+            }
             email_body = render_to_string('register/sendform_email.html', context)
             email = EmailMessage(
                 'Postulación agregada',

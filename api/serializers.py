@@ -13,6 +13,20 @@ class RolSerializer(serializers.ModelSerializer):
         model = Rol
         fields = '__all__'
 
+class GrupoOcupacionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grupo_Ocupacional
+        fields = '__all__'
+        
+class CargoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cargo
+        fields = '__all__'
+class EstablecimientoRPASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Establecimiento_RPA
+        fields = '__all__'        
+
 class TipoDocumentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoDocumento
@@ -148,18 +162,65 @@ class ProfesorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profesor
         fields = '__all__'
+<<<<<<< Updated upstream
         
 class PostulacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Postulacion
         fields = '__all__'
+=======
+             
+class FormularioCreateSerializer(serializers.ModelSerializer):
+    curso_id = serializers.PrimaryKeyRelatedField(queryset=Curso.objects.all(), source='curso')
+
+    class Meta:
+        model = Formulario
+        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso_id']
+
+    def validate(self, data):
+        fecha_fin = data.get('fecha_fin')
+        fecha_inicio = data.get('fecha_inicio')
+        if not fecha_fin or not fecha_inicio:
+            raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inicio' son obligatorios.")
+        
+        if fecha_fin <= fecha_inicio:
+            raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inicio'.")
+        
+        errors = {}
+        required_fields = ['fecha_inicio', 'fecha_fin', 'estado', 'curso']
+        
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = 'Este campo es obligatorio.'
+        
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return data
+
+    def create(self, validated_data):
+        curso = validated_data.pop('curso')
+        formulario = Formulario.objects.create(curso=curso, **validated_data)
+        return formulario
+    
+class PostulacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postulacion
+        fields = '__all__'   
+>>>>>>> Stashed changes
         
 class FormularioSerializer(serializers.ModelSerializer):
+    postulacion = PostulacionSerializer(many=True)
     curso = CursoSerializer()
     class Meta:
         model = Formulario
+<<<<<<< Updated upstream
         fields = '__all__'
 
+=======
+        fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
+        
+>>>>>>> Stashed changes
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grupo_profesional
