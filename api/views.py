@@ -94,6 +94,10 @@ class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
     serializer_class = PlanTrabajoSerializer
 
+class AcuerdoViewSet(viewsets.ModelViewSet):
+    queryset = Acuerdo.objects.all()
+    serializer_class = AcuerdoSerializer
+
 class CoordinadorViewSet(viewsets.ModelViewSet):
     queryset = Coordinador.objects.all()
     serializer_class = CoordinadorSerializer
@@ -116,11 +120,8 @@ class GerenciaDependenciaViewSet(viewsets.ModelViewSet):
 
 class FormularioViewSet(viewsets.ModelViewSet):
     queryset = Formulario.objects.all()
-<<<<<<< Updated upstream
-    serializer_class = FormularioSerializer
-
-=======
     @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del formulario", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
         openapi.Parameter('estado', openapi.IN_QUERY, description="Estado del formulario", type=openapi.TYPE_STRING),
@@ -131,6 +132,7 @@ class FormularioViewSet(viewsets.ModelViewSet):
             return FormularioCreateSerializer
         return FormularioSerializer
     @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del formulario", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_creacion', openapi.IN_QUERY, description="Fecha de creación", type=openapi.TYPE_STRING),
         openapi.Parameter('fecha_modificacion', openapi.IN_QUERY, description="Fecha de modificación", type=openapi.TYPE_STRING),
         openapi.Parameter('estado', openapi.IN_QUERY, description="Estado del formulario", type=openapi.TYPE_STRING),
@@ -157,7 +159,6 @@ class FormularioViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(formularios, many=True)
         return Response(serializer.data)
     
->>>>>>> Stashed changes
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -190,34 +191,8 @@ class PostulacionViewSet(viewsets.ModelViewSet):
     ])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-class CursoFilter(django_filters.FilterSet):
-    class Meta:
-        model = Curso
-        fields = ['nombre','postulacion','profesor','fecha_inicio','fecha_fin','estado']
-
-class CursoViewSet(viewsets.ModelViewSet):
-    queryset = Curso.objects.all()
-    serializer_class = CursoSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CursoFilter
-    @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del curso", type=openapi.TYPE_STRING),
-        openapi.Parameter('fecha_inicio', openapi.IN_QUERY, description="Fecha de inicio", type=openapi.TYPE_STRING),
-        openapi.Parameter('fecha_fin', openapi.IN_QUERY, description="Fecha de fin", type=openapi.TYPE_STRING),
-        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
-        openapi.Parameter('profesor', openapi.IN_QUERY, description="Profesor", type=openapi.TYPE_STRING),
-        openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
-    ])
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-class FormularioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Formulario
-        fields = '__all__'
-
-class EnviarPostulacion(APIView):
+    
+    @action(detail=False, methods=['post'], url_path='enviar-postulacion')
     @swagger_auto_schema(
         operation_description="Agregar postulaciones a un formulario",
         request_body=openapi.Schema(
@@ -243,7 +218,7 @@ class EnviarPostulacion(APIView):
         ),
         responses={200: "Postulacion added successfully", 400: "Invalid data"},
     )
-    def post(self, request, *args, **kwargs):
+    def enviar_postulacion(self, request, *args, **kwargs):
         formulario_id = request.data.get('formulario_id')
         postulacion_data = request.data.get('postulacion')
         
@@ -283,8 +258,7 @@ class EnviarPostulacion(APIView):
         else:
             return Response(postulacion_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-
-class RechazarPostulacion(APIView):
+    @action(detail=False, methods=['post'], url_path='rechazar-postulacion')
     @swagger_auto_schema(
         operation_description="Rechazar postulaciones",
         request_body=openapi.Schema(
@@ -299,7 +273,7 @@ class RechazarPostulacion(APIView):
         ),
         responses={200: "Postulaciones rejected successfully", 400: "Invalid data"},
     )
-    def post(self, request, *args, **kwargs):
+    def rechazar_postulacion(self, request, *args, **kwargs):
         ids_postulacion = request.data.get('ids_postulacion')
         id_curso = request.data.get('id_curso')
         if ids_postulacion is None:
@@ -331,9 +305,8 @@ class RechazarPostulacion(APIView):
         postulaciones.delete()
         
         return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
-    
-        
-class AceptarPostulacion(APIView):
+     
+    @action(detail=False, methods=['post'], url_path='aceptar-postulacion')
     @swagger_auto_schema(
         operation_description="Migrar postulaciones a un curso",
         request_body=openapi.Schema(
@@ -348,7 +321,7 @@ class AceptarPostulacion(APIView):
         ),
         responses={200: "Postulaciones migrated successfully", 400: "Invalid data"},
     )
-    def post(self, request, *args, **kwargs):
+    def aceptar_postulacion(self, request, *args, **kwargs):
         id_curso = request.data.get('id_curso')
         ids_postulacion = request.data.get('ids_postulacion')
 
@@ -387,7 +360,29 @@ class AceptarPostulacion(APIView):
             email.send()
 
         return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)
+        
 
+class CursoFilter(django_filters.FilterSet):
+    class Meta:
+        model = Curso
+        fields = ['nombre','postulacion','profesor','fecha_inicio','fecha_fin','estado']
+
+class CursoViewSet(viewsets.ModelViewSet):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CursoFilter
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('nombre', openapi.IN_QUERY, description="Nombre del curso", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_inicio', openapi.IN_QUERY, description="Fecha de inicio", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_fin', openapi.IN_QUERY, description="Fecha de fin", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+        openapi.Parameter('profesor', openapi.IN_QUERY, description="Profesor", type=openapi.TYPE_STRING),
+        openapi.Parameter('plan_trabajo', openapi.IN_QUERY, description="Plan de trabajo", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",

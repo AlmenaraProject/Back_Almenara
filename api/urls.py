@@ -26,21 +26,15 @@ routers.register(r'grupo-profesional', GrupoProfesionalViewSet)
 routers.register(r'nivel', NivelViewSet)
 routers.register(r'gerencia-dependencia', GerenciaDependenciaViewSet)
 routers.register(r'formulario', FormularioViewSet)
-<<<<<<< Updated upstream
-=======
 routers.register(r'acuerdo', AcuerdoViewSet)
 routers.register(r'cargo', CargoViewSet)
 routers.register(r'grupo-ocupacional', GrupoOcupacionalViewSet)
 routers.register(r'establecimiento_RPA', EstablecimientoRPAViewSet)
 
->>>>>>> Stashed changes
 
 
 urlpatterns = [
     path('', include(routers.urls)),
-    path('aceptar-postulacion/', AceptarPostulacion.as_view(), name='AceptarPostulacion'),
-    path('rechazar-postulacion/', RechazarPostulacion.as_view(), name='RechazarPostulacion'),
-    path('enviar-postulacion/', EnviarPostulacion.as_view(), name='EnviarPostulacion'),
     path('signup/', SingnupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('user-details/', UserDetails.as_view(), name='UserDetails'),
