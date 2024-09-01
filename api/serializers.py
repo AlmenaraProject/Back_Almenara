@@ -32,6 +32,11 @@ class TipoDocumentoSerializer(serializers.ModelSerializer):
         model = TipoDocumento
         fields = '__all__'
 
+class AcuerdoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Acuerdo
+        fields = '__all__'
+
 class UsuarioSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     rol = RolSerializer()
