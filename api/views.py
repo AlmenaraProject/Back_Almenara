@@ -31,6 +31,18 @@ class TipoDocumentoViewSet(viewsets.ModelViewSet):
 class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
+
+class CargoViewSet(viewsets.ModelViewSet):
+    queryset = Cargo.objects.all()
+    serializer_class = CargoSerializer
+
+class GrupoOcupacionalViewSet(viewsets.ModelViewSet):
+    queryset = Grupo_Ocupacional.objects.all()
+    serializer_class = GrupoOcupacionalSerializer
+
+class EstablecimientoRPAViewSet(viewsets.ModelViewSet):
+    queryset = Establecimiento_RPA.objects.all()
+    serializer_class = EstablecimientoRPASerializer
     
 class UniversidadFilter(django_filters.FilterSet):
     class Meta:
@@ -193,10 +205,13 @@ class PostulacionViewSet(viewsets.ModelViewSet):
                     'correo': openapi.Schema(type=openapi.TYPE_STRING, description='Correo del postulante'),
                     'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono del postulante'),
                     'profesion': openapi.Schema(type=openapi.TYPE_STRING, description='Profesión del postulante'),
+                    'establecimiento_RPA': openapi.Schema(type=openapi.TYPE_STRING, description='Establecimiento RPA del postulante'),
+                    'grupo_ocupacional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo ocupacional del postulante'),
                     'regimen_laboral': openapi.Schema(type=openapi.TYPE_STRING, description='Regimen laboral del postulante'),
                     'cargo': openapi.Schema(type=openapi.TYPE_STRING, description='Cargo del postulante'),
                     'codigo_planilla': openapi.Schema(type=openapi.TYPE_STRING, description='Código de planilla del postulante'),
                     'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento del postulante'),
+                    'documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento del postulante')
                 }),
             },
             required=['formulario_id', 'postulacion']
@@ -206,14 +221,18 @@ class PostulacionViewSet(viewsets.ModelViewSet):
     def enviar_postulacion(self, request, *args, **kwargs):
         formulario_id = request.data.get('formulario_id')
         postulacion_data = request.data.get('postulacion')
-
+        
         if not formulario_id or not postulacion_data:
             return Response({"error": "Formulario ID and Postulacion data are required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         try:
             formulario = Formulario.objects.get(id=formulario_id)
         except Formulario.DoesNotExist:
             return Response({"error": "Formulario not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        documento_identidad = postulacion_data.get('documento')
+        if formulario.postulacion.filter(documento=documento_identidad).exists():
+            return Response({"error": "Ya existe una postulación con el mismo documento de identidad en este formulario."}, status=status.HTTP_400_BAD_REQUEST)
 
         postulacion_serializer = PostulacionSerializer(data=postulacion_data)
         if postulacion_serializer.is_valid():
@@ -221,9 +240,11 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             formulario.postulacion.add(postulacion)
             formulario.save()
             # Informar que fue agregado en un email
-            context = {'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
-                       'correo': postulacion.correo, 
-                       'curso': formulario.curso.nombre}
+            context = {
+                'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
+                'correo': postulacion.correo, 
+                'curso': formulario.curso.nombre
+            }
             email_body = render_to_string('register/sendform_email.html', context)
             email = EmailMessage(
                 'Postulación agregada',

@@ -27,6 +27,10 @@ routers.register(r'nivel', NivelViewSet)
 routers.register(r'gerencia-dependencia', GerenciaDependenciaViewSet)
 routers.register(r'formulario', FormularioViewSet)
 routers.register(r'acuerdo', AcuerdoViewSet)
+routers.register(r'cargo', CargoViewSet)
+routers.register(r'grupo-ocupacional', GrupoOcupacionalViewSet)
+routers.register(r'establecimiento_RPA', EstablecimientoRPAViewSet)
+
 
 
 urlpatterns = [

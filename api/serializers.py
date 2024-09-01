@@ -1,4 +1,3 @@
-import datetime
 from api.models import *
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
@@ -13,6 +12,20 @@ class RolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rol
         fields = '__all__'
+
+class GrupoOcupacionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grupo_Ocupacional
+        fields = '__all__'
+        
+class CargoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cargo
+        fields = '__all__'
+class EstablecimientoRPASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Establecimiento_RPA
+        fields = '__all__'        
 
 class TipoDocumentoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,12 +147,7 @@ class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan_trabajo
         fields = '__all__'
-
-class AcuerdoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Acuerdo
-        fields = '__all__'
-
+        
 class CoordinadorSerializer(serializers.ModelSerializer):       
     class Meta:
         model = Coordinador
@@ -154,12 +162,7 @@ class ProfesorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profesor
         fields = '__all__'
-        
-class PostulacionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Postulacion
-        fields = '__all__'
-        
+             
 class FormularioCreateSerializer(serializers.ModelSerializer):
     curso_id = serializers.PrimaryKeyRelatedField(queryset=Curso.objects.all(), source='curso')
 
@@ -192,13 +195,19 @@ class FormularioCreateSerializer(serializers.ModelSerializer):
         curso = validated_data.pop('curso')
         formulario = Formulario.objects.create(curso=curso, **validated_data)
         return formulario
-
+    
+class PostulacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postulacion
+        fields = '__all__'   
+        
 class FormularioSerializer(serializers.ModelSerializer):
+    postulacion = PostulacionSerializer(many=True)
     curso = CursoSerializer()
     class Meta:
         model = Formulario
         fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
-    
+        
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grupo_profesional

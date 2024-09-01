@@ -274,25 +274,62 @@ class Postulacion(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     profesion = models.CharField(max_length=100)
-    documento = models.CharField(max_length=250, null=True)
-    tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
+    documento = models.CharField(max_length=20)
     correo = models.EmailField()
     telefono = models.CharField(max_length=20)
     regimen_laboral = models.CharField(max_length=100)
-    cargo = models.CharField(max_length=100)
+    establecimiento_RPA = models.ForeignKey('Establecimiento_RPA', on_delete=models.CASCADE)
+    grupo_ocupacional = models.ForeignKey('Grupo_Ocupacional', on_delete=models.CASCADE)
+    cargo = models.ForeignKey('Cargo', on_delete=models.CASCADE)
     codigo_planilla = models.CharField(max_length=100)
     fecha_postulacion = models.DateField(auto_now=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
         return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        self.apellido = self.apellido.upper()
+        self.profesion = self.profesion.upper()
+        self.regimen_laboral = self.regimen_laboral.upper()
+        super(Postulacion, self).save(*args, **kwargs)
+
+class Establecimiento_RPA(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Establecimiento_RPA, self).save(*args, **kwargs)
+
+class Grupo_Ocupacional(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Grupo_Ocupacional, self).save(*args, **kwargs)
+
+class Cargo(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Cargo, self).save(*args, **kwargs)
 
 class Formulario(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    curso = models.ForeignKey('Curso', on_delete=models.CASCADE)
+    curso = models.OneToOneField('Curso', on_delete=models.CASCADE)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
-    postulacion = models.ManyToManyField('Postulacion', blank=True)
+    postulacion = models.ManyToManyField(Postulacion, related_name='formularios', blank=True)
     fecha_modificacion = models.DateField(auto_now=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
-        return self.nombre + ' ' + self.fecha_creacion.strftime('%d/%m/%Y') + ' ' + self.fecha_modificacion.strftime('%d/%m/%Y')
+        return self.fecha_creacion.strftime('%d/%m/%Y') + ' ' + self.fecha_modificacion.strftime('%d/%m/%Y')
