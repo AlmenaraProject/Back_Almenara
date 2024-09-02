@@ -325,7 +325,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         for postulacion in postulaciones:
             context = {'curso': curso.nombre, 
                        'fecha_inicio': curso.fecha_inicio, 
-                       'fecha_inicio': curso.fecha_fin, 
+                       'fecha_fin': curso.fecha_fin, 
                        'correo': postulacion.correo, 
                        'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido}
             email_body = render_to_string('register/course_confirmation_email.html', context)

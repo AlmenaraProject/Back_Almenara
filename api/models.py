@@ -274,6 +274,7 @@ class Postulacion(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     profesion = models.CharField(max_length=100)
+    area = models.CharField(max_length=100)
     documento = models.CharField(max_length=250, null=True)
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
     correo = models.EmailField()
