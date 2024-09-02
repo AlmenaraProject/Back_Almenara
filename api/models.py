@@ -282,6 +282,7 @@ class Postulacion(models.Model):
     grupo_ocupacional = models.ForeignKey('Grupo_Ocupacional', on_delete=models.CASCADE)
     cargo = models.ForeignKey('Cargo', on_delete=models.CASCADE)
     codigo_planilla = models.CharField(max_length=100)
+    area = models.CharField(max_length=100, null=True)
     fecha_postulacion = models.DateField(auto_now=True)
     estado = models.BooleanField(default=True)
     def __str__(self):
