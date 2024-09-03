@@ -284,7 +284,7 @@ class Postulacion(models.Model):
     codigo_planilla = models.CharField(max_length=100)
     area = models.CharField(max_length=100, null=True)
     fecha_postulacion = models.DateField(auto_now=True)
-    estado = models.BooleanField(default=True)
+    estado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
     def save(self , *args, **kwargs):
