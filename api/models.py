@@ -10,7 +10,7 @@ class Persona(models.Model):
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     direccion = models.CharField(max_length=200, null=True)
-    numero_documento = models.CharField(max_length=20)
+    numero_documento = models.CharField(max_length=20, unique=True)
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -48,7 +48,7 @@ class TipoDocumento(models.Model):
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
+    persona = models.OneToOneField('Persona', on_delete=models.CASCADE, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=100)
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE)
@@ -267,7 +267,7 @@ class Curso(models.Model):
     def save(self , *args, **kwargs):
         self.nombre = self.nombre.upper()
         self.modalidad = self.modalidad.upper()
-        super(Curso, self).save(*args, **kwargs)
+        super(Curso, self).save(*args, **kwargs)  
 
 class Postulacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -293,6 +293,21 @@ class Postulacion(models.Model):
         self.profesion = self.profesion.upper()
         self.regimen_laboral = self.regimen_laboral.upper()
         super(Postulacion, self).save(*args, **kwargs)
+         
+class PostulacionCurso(models.Model):
+    postulacion = models.ForeignKey('Postulacion', on_delete=models.CASCADE)
+    curso = models.ForeignKey('Curso', on_delete=models.CASCADE)
+    asistencia = models.BooleanField(default=False)  # O puedes definirla con un valor numérico, si es más complejo
+    notas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ejemplo de campo para nota
+    observaciones = models.TextField(null=True, blank=True)
+    
+    fecha_registro = models.DateField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.postulacion} - {self.curso} - Nota: {self.notas}'
+    
+    class Meta:
+        unique_together = ('postulacion', 'curso')  # Evita duplicados de una misma combinación postulacion/curso
 
 class Establecimiento_RPA(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
