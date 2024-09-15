@@ -82,6 +82,11 @@ class GerenDependenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gerencia_dependencia
         fields = '__all__'  
+
+class PostulacionCursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postulacion_curso
+        fields = '__all__'
     
 class ProfesionalSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()

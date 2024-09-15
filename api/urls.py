@@ -30,6 +30,7 @@ routers.register(r'acuerdo', AcuerdoViewSet)
 routers.register(r'cargo', CargoViewSet)
 routers.register(r'grupo-ocupacional', GrupoOcupacionalViewSet)
 routers.register(r'establecimiento_RPA', EstablecimientoRPAViewSet)
+routers.register(r'postulacion-curso', PostulacionCursoViewSet)
 
 
 

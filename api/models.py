@@ -294,7 +294,7 @@ class Postulacion(models.Model):
         self.regimen_laboral = self.regimen_laboral.upper()
         super(Postulacion, self).save(*args, **kwargs)
          
-class PostulacionCurso(models.Model):
+class Postulacion_curso(models.Model):
     postulacion = models.ForeignKey('Postulacion', on_delete=models.CASCADE)
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE)
     asistencia = models.BooleanField(default=False)  # O puedes definirla con un valor numérico, si es más complejo

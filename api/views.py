@@ -382,7 +382,11 @@ class CursoViewSet(viewsets.ModelViewSet):
     ])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
+class PostulacionCursoViewSet(viewsets.ModelViewSet):
+    queryset = Postulacion_curso.objects.all()
+    serializer_class = PostulacionCursoSerializer
+   
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",
