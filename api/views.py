@@ -359,8 +359,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email.content_subtype = 'html'
             email.send()
 
-        return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)
-        
+        return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)     
 
 class CursoFilter(django_filters.FilterSet):
     class Meta:
