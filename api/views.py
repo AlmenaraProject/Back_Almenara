@@ -86,9 +86,9 @@ class CentroAsistencialViewSet(viewsets.ModelViewSet):
     queryset = Centro_Asistencial.objects.all().order_by('id')
     serializer_class = CentroAsistencialSerializer
 
-class TipoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Tipo_profesional.objects.all().order_by('id')
-    serializer_class = TipoProfesionalSerializer
+class CategoriaProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaProfesional.objects.all()
+    serializer_class = CategoriaProfesionalSerializer
 
 class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
@@ -107,7 +107,7 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     serializer_class = ProfesorSerializer
 
 class GrupoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Grupo_profesional.objects.all()
+    queryset = GrupoProfesional.objects.all()
     serializer_class = GrupoProfesionalSerializer
 
 class NivelViewSet(viewsets.ModelViewSet):
