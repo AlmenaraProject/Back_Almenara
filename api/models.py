@@ -284,6 +284,9 @@ class Postulacion(models.Model):
     codigo_planilla = models.CharField(max_length=100)
     area = models.CharField(max_length=100, null=True)
     fecha_postulacion = models.DateField(auto_now=True)
+    asistencia = models.BooleanField(default=False)  # O puedes definirla con un valor numérico, si es más complejo
+    notas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ejemplo de campo para nota
+    observaciones = models.TextField(null=True, blank=True)
     estado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
@@ -292,22 +295,9 @@ class Postulacion(models.Model):
         self.apellido = self.apellido.upper()
         self.profesion = self.profesion.upper()
         self.regimen_laboral = self.regimen_laboral.upper()
-        super(Postulacion, self).save(*args, **kwargs)
-         
-class Postulacion_curso(models.Model):
-    postulacion = models.ForeignKey('Postulacion', on_delete=models.CASCADE)
-    curso = models.ForeignKey('Curso', on_delete=models.CASCADE)
-    asistencia = models.BooleanField(default=False)  # O puedes definirla con un valor numérico, si es más complejo
-    notas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ejemplo de campo para nota
-    observaciones = models.TextField(null=True, blank=True)
-    
-    fecha_registro = models.DateField(auto_now_add=True)
-    
-    def __str__(self):
-        return f'{self.postulacion} - {self.curso} - Nota: {self.notas}'
-    
-    class Meta:
-        unique_together = ('postulacion', 'curso')  # Evita duplicados de una misma combinación postulacion/curso
+        self.area = self.area.upper()
+        self.observaciones = self.observaciones.upper()
+        super(Postulacion, self).save(*args, **kwargs)         
 
 class Establecimiento_RPA(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
