@@ -294,7 +294,6 @@ class Postulacion(models.Model):
         self.nombre = self.nombre.upper()
         self.apellido = self.apellido.upper()
         self.profesion = self.profesion.upper()
-        self.regimen_laboral = self.regimen_laboral.upper()
         self.area = self.area.upper()
         super(Postulacion, self).save(*args, **kwargs)         
 
