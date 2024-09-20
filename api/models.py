@@ -194,7 +194,7 @@ class Especialidad(models.Model):
     def save(self , *args, **kwargs):
         self.nombre = self.nombre.upper()
         super(Especialidad, self).save(*args, **kwargs)
-        return f'{self.nombre + ' ' + self.grupo_profesional.nombre}'
+        return f'{self.nombre} {self.grupo_profesional.nombre}'
 
         
 class Profesional(models.Model):
