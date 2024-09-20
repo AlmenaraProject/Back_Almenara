@@ -300,9 +300,10 @@ class Postulacion(models.Model):
     codigo_planilla = models.CharField(max_length=100)
     area = models.CharField(max_length=100, null=True)
     fecha_postulacion = models.DateField(auto_now=True)
-    asistencia = models.BooleanField(default=False)  # O puedes definirla con un valor numérico, si es más complejo
+    asistencia = models.FloatField(null=True)
     notas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ejemplo de campo para nota
     observaciones = models.TextField(null=True, blank=True)
+    is_rejected = models.BooleanField(default=False)
     estado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
