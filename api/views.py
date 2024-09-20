@@ -636,6 +636,7 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Entidad a la que pertenece'),
                 'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de fin de contrato o trabajo'),
                 'duracion': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duración en meses'),
+                'is_postgrado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Indica si el profesional es postgrado'),
                 'sede_adjudicacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Sede de adjudicación'),
                 'gerencia_dependencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Gerencia o dependencia del profesional'),
                 'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Universidad de procedencia'),
@@ -678,7 +679,12 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Categoria profesional no encontrada.'}, status=status.HTTP_400_BAD_REQUEST)
             except GrupoProfesional.DoesNotExist:
                 return Response({'error': 'Grupo profesional no encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
-
+            
+            if categoria_profesional.is_postgrado == True:
+                profesional_data['is_postgrado'] = True
+            else:
+                profesional_data['is_postgrado'] = False
+                
             # Ahora se añade persona, categoria_profesional, y grupo_profesional a los datos del profesional
             profesional_data['persona'] = persona.id  # Asegurar que la relación persona está en los datos
             profesional_data['categoria_profesional'] = categoria_profesional.id

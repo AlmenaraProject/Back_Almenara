@@ -210,7 +210,7 @@ class Profesional(models.Model):
     categoria_profesional = models.ForeignKey('CategoriaProfesional', on_delete=models.CASCADE)  # Relación directa con CategoriaProfesional
     grupo_profesional = models.ForeignKey('GrupoProfesional', on_delete=models.CASCADE)  # Relación directa con GrupoProfesional
     especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)  # Relación directa con Especialidad
-    
+    is_postgrado = models.BooleanField(default=False)
     sede_adjudicacion = models.ForeignKey('Sede_Adjudicacion', on_delete=models.CASCADE, null=True, blank=True)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, on_delete=models.CASCADE)
     fecha_inscripcion = models.DateField()
