@@ -86,9 +86,9 @@ class CentroAsistencialViewSet(viewsets.ModelViewSet):
     queryset = Centro_Asistencial.objects.all().order_by('id')
     serializer_class = CentroAsistencialSerializer
 
-class TipoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Tipo_profesional.objects.all().order_by('id')
-    serializer_class = TipoProfesionalSerializer
+class CategoriaProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaProfesional.objects.all()
+    serializer_class = CategoriaProfesionalSerializer
 
 class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
@@ -107,7 +107,7 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     serializer_class = ProfesorSerializer
 
 class GrupoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Grupo_profesional.objects.all()
+    queryset = GrupoProfesional.objects.all()
     serializer_class = GrupoProfesionalSerializer
 
 class NivelViewSet(viewsets.ModelViewSet):
@@ -264,34 +264,54 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'ids_postulacion': openapi.Schema(type=openapi.TYPE_ARRAY, 
-                                                  items=openapi.Schema(type=openapi.TYPE_STRING),
-                                                  description='IDs de las postulaciones'),
-                'id_curso': openapi.Schema(type=openapi.TYPE_STRING, description='ID del curso'),
+                'id_curso': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='ID del curso'
+                ),
+                'postulaciones': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING),
+                    description='Diccionario de IDs de postulaciones y sus observaciones'
+                ),
             },
-            required=['ids_postulacion']
+            required=['id_curso', 'postulaciones']
         ),
-        responses={200: "Postulaciones rejected successfully", 400: "Invalid data"},
+        responses={
+            200: openapi.Response(description="Postulaciones rejected successfully"),
+            400: openapi.Response(description="Invalid data"),
+            404: openapi.Response(description="Postulacion or Curso not found"),
+        },
     )
     def rechazar_postulacion(self, request, *args, **kwargs):
-        ids_postulacion = request.data.get('ids_postulacion')
         id_curso = request.data.get('id_curso')
-        if ids_postulacion is None:
-            return Response({"error": "id_postulacion is required"}, status=status.HTTP_400_BAD_REQUEST)
+        postulaciones_data = request.data.get('postulaciones', {})
+
         if id_curso is None:
             return Response({"error": "id_curso is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(postulaciones_data, dict):
+            return Response({"error": "postulaciones must be a dictionary"}, status=status.HTTP_400_BAD_REQUEST)
+        ids_postulacion = list(postulaciones_data.keys())
+
         try:
             postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
         except Postulacion.DoesNotExist:
             return Response({"error": "Postulacion not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        try:
+            curso = Curso.objects.get(id=id_curso)
+        except Curso.DoesNotExist:
+            return Response({"error": "Curso not found"}, status=status.HTTP_404_NOT_FOUND)
+
         # Informar que fue rechazado en un email
         for postulacion in postulaciones:
-            curso = Curso.objects.get(id=id_curso)
-            context = {'nombre': postulacion.nombre,
-                       'apellido': postulacion.apellido,
-                       'correo': postulacion.correo,
-                       'curso': curso.nombre}
+            observacion = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            context = {
+                'nombre': postulacion.nombre,
+                'apellido': postulacion.apellido,
+                'correo': postulacion.correo,
+                'curso': curso.nombre,
+                'observacion': observacion
+            }
             email_body = render_to_string('register/reject_email.html', context)
             email = EmailMessage(
                 'Rechazo de postulación',
@@ -301,10 +321,14 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             )
             email.content_subtype = 'html'
             email.send()
-            
-        postulaciones.delete()
-        
+
+        postulaciones.update(is_rejected=True)
+        for postulacion in postulaciones:
+            postulacion.observaciones = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            postulacion.save()
+
         return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
+
      
     @action(detail=False, methods=['post'], url_path='aceptar-postulacion')
     @swagger_auto_schema(
@@ -338,7 +362,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             return Response({"error": "No valid postulaciones found"}, status=status.HTTP_404_NOT_FOUND)
         
         postulaciones.update(estado=True)
-        
+        postulaciones.update(is_rejected=False)
         curso.postulacion.add(*postulaciones)
         curso.save()
         
@@ -557,7 +581,7 @@ def logout(request):
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
-        fields = ['persona','CMP','fecha_inscripcion','fecha_modificacion','estado','especialidad','centro_Asistencial','tipo_profesional','plaza','entidad']
+        fields = ['persona','CMP','fecha_inscripcion','estado','especialidad','centro_Asistencial','plaza','entidad']
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()

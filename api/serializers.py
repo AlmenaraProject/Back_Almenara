@@ -73,9 +73,9 @@ class CentroAsistencialSerializer(serializers.ModelSerializer):
         model = Centro_Asistencial
         fields = '__all__'
 
-class TipoProfesionalSerializer(serializers.ModelSerializer):
+class CategoriaProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tipo_profesional
+        model = CategoriaProfesional
         fields = '__all__'
   
 class GerenDependenciaSerializer(serializers.ModelSerializer):
@@ -215,7 +215,7 @@ class FormularioSerializer(serializers.ModelSerializer):
         
 class GrupoProfesionalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Grupo_profesional
+        model = GrupoProfesional
         fields = '__all__'
 
 class NivelSerializer(serializers.ModelSerializer):
