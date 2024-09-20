@@ -326,7 +326,8 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         for postulacion in postulaciones:
             postulacion.observaciones = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
             postulacion.save()
-
+            curso.postulacion.add(*postulaciones)
+            curso.save()
         return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
 
      
