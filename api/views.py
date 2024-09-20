@@ -582,7 +582,7 @@ def logout(request):
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
-        fields = ['persona','CMP','fecha_inscripcion','estado','especialidad','centro_Asistencial','plaza','entidad']
+        fields = ['persona','CMP','fecha_inscripcion','categoria_profesional','estado','especialidad','centro_asistencial','plaza','entidad']
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
@@ -610,56 +610,97 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'persona': openapi.Schema(type=openapi.TYPE_OBJECT, description='Datos de la persona', properties={
-                    'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
-                    'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
-                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
-                    'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
-                    'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
-                    'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
-                    'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
-                }),
-                'CMP': openapi.Schema(type=openapi.TYPE_STRING, description='CMP'),
-                'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de inscripción'),
-                'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de modificación'),
-                'estado': openapi.Schema(type=openapi.TYPE_STRING, description='Estado'),
-                'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='Centro Asistencial'),
-                'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Tipo de profesional'),
-                'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo de profesional'),
-                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='Especialidad'),
-                'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='Plaza'),
-                'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='Entidad'),
-                'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de fin'),
-                'duracion': openapi.Schema(type=openapi.TYPE_STRING, description='Duración'),
-                'sede_Adjudicacion': openapi.Schema(type=openapi.TYPE_STRING, description='Sede de adjudicación'),
-                'gerencia_dependencia': openapi.Schema(type=openapi.TYPE_STRING, description='Gerencia o dependencia'),
-                'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='Universidad de procedencia'),
-                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='Plan de trabajo'),
-                'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Usuario de modificación'),
-                'is_postgraduado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Postgraduado'),
-                'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='Nivel'),
+                'persona': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description='Datos de la persona',
+                    properties={
+                        'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
+                        'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
+                        'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
+                        'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
+                        'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
+                        'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
+                    },
+                    required=['nombre', 'apellido', 'email', 'telefono', 'numero_documento', 'tipo_documento']
+                ),
+                'CMP': openapi.Schema(type=openapi.TYPE_STRING, description='Código CMP del profesional'),
+                'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de inscripción'),
+                'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de modificación'),
+                'estado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Estado del profesional'),
+                'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Centro Asistencial donde labora'),
+                'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Tipo de profesional (CategoriaProfesional)'),
+                'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Grupo Profesional'),
+                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Especialidad del profesional'),
+                'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Plaza'),
+                'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Entidad a la que pertenece'),
+                'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de fin de contrato o trabajo'),
+                'duracion': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duración en meses'),
+                'is_postgrado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Indica si el profesional es postgrado'),
+                'sede_adjudicacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Sede de adjudicación'),
+                'gerencia_dependencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Gerencia o dependencia del profesional'),
+                'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Universidad de procedencia'),
+                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Plan de trabajo asignado'),
+                'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID del usuario que realizó la última modificación'),
+                'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Nivel del profesional'),
             },
-            required=['persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'especialidad', 'centro_Asistencial', 'tipo_profesional', 'plaza', 'entidad', 'universidad_procedencia', 'plan_trabajo', 'usuario_modificacion', 'is_postgraduado', 'nivel'],
+            required=[
+                'persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'centro_Asistencial',
+                'tipo_profesional', 'grupo_profesional', 'especialidad', 'plaza', 'entidad', 'universidad_procedencia',
+                'plan_trabajo', 'usuario_modificacion', 'is_postgraduado', 'nivel'
+            ],
         ),
         responses={
-            201: openapi.Response('Profesional created successfully', ProfesionalSerializer),
-            400: "Invalid data",
+            201: openapi.Response('Profesional creado exitosamente', ProfesionalSerializer),
+            400: "Datos inválidos",
         },
     )
-    def create(self, request, *args, **kwargs):
-        persona_data = request.data.get('persona')
-        profesional_data = request.data
 
+    def create(self, request, *args, **kwargs):
+        # Obtener los datos de la persona desde la petición
+        persona_data = request.data.get('persona')
+        
+        # Obtener datos del profesional, incluyendo categoria_profesional y grupo_profesional
+        profesional_data = request.data
+        categoria_profesional_id = profesional_data.get('categoria_profesional')
+        grupo_profesional_id = profesional_data.get('grupo_profesional')
+
+        # Validar la creación de la persona
         persona_serializer = PersonaSerializer(data=persona_data)
         if persona_serializer.is_valid():
+            # Guardar la persona si es válido
             persona = persona_serializer.save()
+            
+            # Asegurarse de que los campos categoria_profesional y grupo_profesional existen y son válidos
+            try:
+                categoria_profesional = CategoriaProfesional.objects.get(id=categoria_profesional_id)
+                grupo_profesional = GrupoProfesional.objects.get(id=grupo_profesional_id)
+            except CategoriaProfesional.DoesNotExist:
+                return Response({'error': 'Categoria profesional no encontrada.'}, status=status.HTTP_400_BAD_REQUEST)
+            except GrupoProfesional.DoesNotExist:
+                return Response({'error': 'Grupo profesional no encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if categoria_profesional.is_postgrado == True:
+                profesional_data['is_postgrado'] = True
+            else:
+                profesional_data['is_postgrado'] = False
+                
+            # Ahora se añade persona, categoria_profesional, y grupo_profesional a los datos del profesional
+            profesional_data['persona'] = persona.id  # Asegurar que la relación persona está en los datos
+            profesional_data['categoria_profesional'] = categoria_profesional.id
+            profesional_data['grupo_profesional'] = grupo_profesional.id
+
+            # Validar y crear el profesional
             profesional_serializer = ProfesionalSerializer(data=profesional_data)
             if profesional_serializer.is_valid():
                 profesional_serializer.save()
                 return Response(profesional_serializer.data, status=status.HTTP_201_CREATED)
             else:
+                # Si la creación del profesional falla, eliminamos la persona creada
                 persona.delete()  # Rollback persona creation if profesional data is invalid
                 return Response(profesional_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Si la creación de persona falla, retornar los errores
         return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class PasswordResetView(APIView):

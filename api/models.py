@@ -151,7 +151,7 @@ class CategoriaProfesional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
     estado = models.BooleanField(default=True)
-
+    is_postgrado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre
 
@@ -176,6 +176,7 @@ class GrupoProfesional(models.Model):
     def save(self , *args, **kwargs):
         self.nombre = self.nombre.upper()
         super(GrupoProfesional, self).save(*args, **kwargs)
+        return f'{self.nombre + ' ' + self.categoria_profesional.nombre}'
 
 
 class Especialidad(models.Model):
@@ -193,6 +194,7 @@ class Especialidad(models.Model):
     def save(self , *args, **kwargs):
         self.nombre = self.nombre.upper()
         super(Especialidad, self).save(*args, **kwargs)
+        return f'{self.nombre + ' ' + self.grupo_profesional.nombre}'
 
         
 class Profesional(models.Model):
@@ -201,9 +203,14 @@ class Profesional(models.Model):
     CMP = models.CharField(max_length=20, null=True)
     plaza = models.ForeignKey('Plaza', on_delete=models.CASCADE)
     entidad = models.ForeignKey('Entidad', on_delete=models.CASCADE)
-    centro_Asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
+    centro_asistencial = models.ForeignKey('Centro_Asistencial', on_delete=models.CASCADE)
     universidad_procedencia = models.ForeignKey('Universidad', on_delete=models.CASCADE)
-    especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)  # Link to Especialidad
+    
+    # Relaciones con CategoriaProfesional, GrupoProfesional, y Especialidad
+    categoria_profesional = models.ForeignKey('CategoriaProfesional', on_delete=models.CASCADE)  # Relación directa con CategoriaProfesional
+    grupo_profesional = models.ForeignKey('GrupoProfesional', on_delete=models.CASCADE)  # Relación directa con GrupoProfesional
+    especialidad = models.ForeignKey('Especialidad', on_delete=models.CASCADE)  # Relación directa con Especialidad
+    is_postgrado = models.BooleanField(default=False)
     sede_adjudicacion = models.ForeignKey('Sede_Adjudicacion', on_delete=models.CASCADE, null=True, blank=True)
     plan_trabajo = models.ForeignKey('Plan_trabajo', blank=True, null=True, on_delete=models.CASCADE)
     fecha_inscripcion = models.DateField()
@@ -212,10 +219,11 @@ class Profesional(models.Model):
     gerencia_dependencia = models.ForeignKey('Gerencia_dependencia', on_delete=models.CASCADE, null=True, blank=True)
     nivel = models.ForeignKey('Nivel', on_delete=models.CASCADE)
     usuario_modificacion = models.ForeignKey('Usuario', on_delete=models.CASCADE)
-    is_postgraduado = models.BooleanField(default=False)
     estado = models.BooleanField(default=True)
+
     def __str__(self):
-        return self.persona.nombre + ' ' + self.persona.apellido
+        return f'{self.persona.nombre} {self.persona.apellido}'
+
     
 class Gerencia_dependencia(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
