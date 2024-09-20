@@ -264,22 +264,17 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'ids_postulacion': openapi.Schema(
-                    type=openapi.TYPE_ARRAY, 
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description='IDs de las postulaciones'
-                ),
                 'id_curso': openapi.Schema(
                     type=openapi.TYPE_STRING, 
                     description='ID del curso'
                 ),
-                'observaciones': openapi.Schema(
+                'postulaciones': openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     additional_properties=openapi.Schema(type=openapi.TYPE_STRING),
-                    description='Observaciones para cada postulación'
+                    description='Diccionario de IDs de postulaciones y sus observaciones'
                 ),
             },
-            required=['ids_postulacion', 'id_curso']
+            required=['id_curso', 'postulaciones']
         ),
         responses={
             200: openapi.Response(description="Postulaciones rejected successfully"),
@@ -288,29 +283,28 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         },
     )
     def rechazar_postulacion(self, request, *args, **kwargs):
-        ids_postulacion = request.data.get('ids_postulacion')
         id_curso = request.data.get('id_curso')
-        observaciones = request.data.get('observaciones', {})
+        postulaciones_data = request.data.get('postulaciones', {})
 
-        print(ids_postulacion)
-        print(observaciones)
-        if ids_postulacion is None:
-            return Response({"error": "ids_postulacion is required"}, status=status.HTTP_400_BAD_REQUEST)
         if id_curso is None:
             return Response({"error": "id_curso is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(observaciones, dict):
-            return Response({"error": "observaciones must be a dictionary"}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(postulaciones_data, dict):
+            return Response({"error": "postulaciones must be a dictionary"}, status=status.HTTP_400_BAD_REQUEST)
+        ids_postulacion = list(postulaciones_data.keys())
 
         try:
             postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
         except Postulacion.DoesNotExist:
             return Response({"error": "Postulacion not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        curso = Curso.objects.get(id=id_curso)
-        
+        try:
+            curso = Curso.objects.get(id=id_curso)
+        except Curso.DoesNotExist:
+            return Response({"error": "Curso not found"}, status=status.HTTP_404_NOT_FOUND)
+
         # Informar que fue rechazado en un email
         for postulacion in postulaciones:
-            observacion = observaciones.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            observacion = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
             context = {
                 'nombre': postulacion.nombre,
                 'apellido': postulacion.apellido,
@@ -329,9 +323,12 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email.send()
 
         postulaciones.update(is_rejected=True)
-        postulaciones.update(observaciones=observacion)
+        for postulacion in postulaciones:
+            postulacion.observaciones = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            postulacion.save()
 
         return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
+
      
     @action(detail=False, methods=['post'], url_path='aceptar-postulacion')
     @swagger_auto_schema(
