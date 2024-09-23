@@ -93,13 +93,18 @@ class ProfesionalSerializer(serializers.ModelSerializer):
     def validate(self, data):
         fecha_fin = data.get('fecha_fin')
         fecha_inscripcion = data.get('fecha_inscripcion')
-        
+
         if not fecha_fin or not fecha_inscripcion:
             raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inscripcion' son obligatorios.")
         
         if fecha_fin <= fecha_inscripcion:
             raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
         
+        categoria_profesional = data.get('categoria_profesional')
+        grupo_profesional = data.get('grupo_profesional')
+        if categoria_profesional and GrupoProfesional:
+            if grupo_profesional.categoria_profesional != categoria_profesional:
+                raise serializers.ValidationError("La 'Categoria Profesional' no pertenece al 'Grupo Profesional' seleccionado.")
         errors = {}
         required_fields = [
             'especialidad', 'estado', 'is_postgrado',
