@@ -57,9 +57,9 @@ class ImportProfesionalView(View):
                 entidad = get_object_or_404(Entidad, nombre=row['ENTIDAD_NOMBRE'])
                 centro_asistencial = get_object_or_404(Centro_Asistencial, nombre=row['CENTRO_ASISTENCIAL_NOMBRE'])
                 universidad = get_object_or_404(Universidad, nombre=row['UNIVERSIDAD_NOMBRE'])
-                tipo_profesional = get_object_or_404(Tipo_profesional, nombre=row['TIPO_PROFESIONAL_NOMBRE'])
+                categoria_profesional = get_object_or_404(CategoriaProfesional, nombre=row['CATEGORIA_PROFESIONAL_NOMBRE'])
                 plan_trabajo = get_object_or_404(Plan_trabajo, nombre=row['PLAN_TRABAJO_NOMBRE'])
-                grupo_profesional = get_object_or_404(Grupo_profesional, nombre=row['GRUPO_PROFESIONAL_NOMBRE'])
+                grupo_profesional = get_object_or_404(GrupoProfesional, nombre=row['GRUPO_PROFESIONAL_NOMBRE'])
                 nivel = get_object_or_404(Nivel, nombre=row['NIVEL_NOMBRE'])
                 
                 datos_validos.append({
@@ -78,7 +78,7 @@ class ImportProfesionalView(View):
                         'entidad': entidad,
                         'centro_Asistencial': centro_asistencial,
                         'universidad_procedencia': universidad,
-                        'tipo_profesional': tipo_profesional,
+                        'categoria_profesional': categoria_profesional,
                         'grupo_profesional': grupo_profesional,
                         'especialidad': especialidad,
                         'plan_trabajo': plan_trabajo,

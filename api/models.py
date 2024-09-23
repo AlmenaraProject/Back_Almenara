@@ -249,6 +249,7 @@ class Plan_trabajo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)
     universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    is_postgrado = models.BooleanField(default=False)
     acuerdo = models.ManyToManyField('Acuerdo', blank=True)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
