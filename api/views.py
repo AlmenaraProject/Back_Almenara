@@ -586,7 +586,14 @@ def logout(request):
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
-        fields = ['persona','CMP','fecha_inscripcion','categoria_profesional','estado','especialidad','centro_asistencial','plaza','entidad']
+        class ProfesionalFilter(django_filters.FilterSet):
+            class Meta:
+                model = Profesional
+                fields = [
+                    'persona', 'CMP', 'plaza', 'entidad', 'centro_asistencial', 'universidad_procedencia',
+                    'categoria_profesional', 'grupo_profesional', 'especialidad', 'is_postgrado', 'sede_adjudicacion',
+                    'plan_trabajo', 'fecha_inscripcion', 'fecha_fin', 'duracion', 'gerencia_dependencia', 'nivel', 'estado'
+                ]
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
