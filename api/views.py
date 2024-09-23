@@ -628,8 +628,8 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de inscripción'),
                 'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de modificación'),
                 'estado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Estado del profesional'),
-                'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Centro Asistencial donde labora'),
-                'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Tipo de profesional (CategoriaProfesional)'),
+                'centro_asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Centro Asistencial donde labora'),
+                'categoria_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Tipo de profesional (CategoriaProfesional)'),
                 'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Grupo Profesional'),
                 'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Especialidad del profesional'),
                 'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Plaza'),
@@ -645,9 +645,9 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
                 'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Nivel del profesional'),
             },
             required=[
-                'persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'centro_Asistencial',
-                'tipo_profesional', 'grupo_profesional', 'especialidad', 'plaza', 'entidad', 'universidad_procedencia',
-                'plan_trabajo', 'usuario_modificacion', 'is_postgraduado', 'nivel'
+                'persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'centro_asistencial',
+                'categoria_profesional', 'grupo_profesional', 'especialidad', 'plaza', 'entidad', 'universidad_procedencia',
+                'plan_trabajo', 'usuario_modificacion', 'is_postgrado', 'nivel'
             ],
         ),
         responses={
@@ -655,54 +655,19 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
             400: "Datos inválidos",
         },
     )
-
     def create(self, request, *args, **kwargs):
-        # Obtener los datos de la persona desde la petición
-        persona_data = request.data.get('persona')
+        serializer = ProfesionalSerializer(data=request.data)
+        if serializer.is_valid():
+            profesional = serializer.save()
+            return Response({
+                "message": "Profesional creado exitosamente",
+                "data": ProfesionalSerializer(profesional).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "Error en la validación de los datos",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Obtener datos del profesional, incluyendo categoria_profesional y grupo_profesional
-        profesional_data = request.data
-        categoria_profesional_id = profesional_data.get('categoria_profesional')
-        grupo_profesional_id = profesional_data.get('grupo_profesional')
-
-        # Validar la creación de la persona
-        persona_serializer = PersonaSerializer(data=persona_data)
-        if persona_serializer.is_valid():
-            # Guardar la persona si es válido
-            persona = persona_serializer.save()
-            
-            # Asegurarse de que los campos categoria_profesional y grupo_profesional existen y son válidos
-            try:
-                categoria_profesional = CategoriaProfesional.objects.get(id=categoria_profesional_id)
-                grupo_profesional = GrupoProfesional.objects.get(id=grupo_profesional_id)
-            except CategoriaProfesional.DoesNotExist:
-                return Response({'error': 'Categoria profesional no encontrada.'}, status=status.HTTP_400_BAD_REQUEST)
-            except GrupoProfesional.DoesNotExist:
-                return Response({'error': 'Grupo profesional no encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            if categoria_profesional.is_postgrado == True:
-                profesional_data['is_postgrado'] = True
-            else:
-                profesional_data['is_postgrado'] = False
-                
-            # Ahora se añade persona, categoria_profesional, y grupo_profesional a los datos del profesional
-            profesional_data['persona'] = persona.id  # Asegurar que la relación persona está en los datos
-            profesional_data['categoria_profesional'] = categoria_profesional.id
-            profesional_data['grupo_profesional'] = grupo_profesional.id
-
-            # Validar y crear el profesional
-            profesional_serializer = ProfesionalSerializer(data=profesional_data)
-            if profesional_serializer.is_valid():
-                profesional_serializer.save()
-                return Response(profesional_serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                # Si la creación del profesional falla, eliminamos la persona creada
-                persona.delete()  # Rollback persona creation if profesional data is invalid
-                return Response(profesional_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Si la creación de persona falla, retornar los errores
-        return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 class PasswordResetView(APIView):
     @swagger_auto_schema(
         operation_description="Enviar correo electrónico de restablecimiento de contraseña",

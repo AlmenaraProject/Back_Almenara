@@ -102,10 +102,10 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         
         errors = {}
         required_fields = [
-            'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
-            'centro_Asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
+            'especialidad', 'estado', 'is_postgrado',
+            'centro_asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
             'fecha_fin', 'nivel', 'entidad', 'plan_trabajo', 'universidad_procedencia',
-            'usuario_modificacion'
+            'usuario_modificacion','categoria_profesional','grupo_profesional'
         ]  
         for field in required_fields:
             if not data.get(field):
@@ -127,13 +127,13 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         profesional = Profesional.objects.create(
             persona=persona,
             CMP=validated_data.get('CMP', None),
-            tipo_profesional=validated_data['tipo_profesional'],
+            categoria_profesional=validated_data['categoria_profesional'],
+            grupo_profesional=validated_data['grupo_profesional'],
             especialidad=validated_data['especialidad'],
             estado=validated_data['estado'],
-            is_postgraduado=validated_data['is_postgraduado'],
-            centro_Asistencial=validated_data['centro_Asistencial'],
+            is_postgrado=validated_data['is_postgrado'],
+            centro_asistencial=validated_data['centro_asistencial'],
             plaza=validated_data['plaza'],
-            grupo_profesional=validated_data['grupo_profesional'],
             fecha_inscripcion=fecha_inscripcion,
             fecha_fin=fecha_fin,
             duracion=duracion,

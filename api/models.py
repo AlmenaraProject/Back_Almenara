@@ -10,7 +10,7 @@ class Persona(models.Model):
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     direccion = models.CharField(max_length=200, null=True)
-    numero_documento = models.CharField(max_length=20)
+    numero_documento = models.CharField(max_length=20, unique=True)
     tipo_documento = models.ForeignKey('TipoDocumento', on_delete=models.CASCADE)
 
     def __str__(self):
