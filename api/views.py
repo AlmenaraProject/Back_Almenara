@@ -108,8 +108,12 @@ class ProfesorViewSet(viewsets.ModelViewSet):
 
 class GrupoProfesionalViewSet(viewsets.ModelViewSet):
     queryset = GrupoProfesional.objects.all()
-    serializer_class = GrupoProfesionalSerializer
-
+    
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return GrupoProfesionalCreateSerializer
+        return GrupoProfesionalSerializer
+    
 class NivelViewSet(viewsets.ModelViewSet):
     queryset = Nivel.objects.all()
     serializer_class = NivelSerializer

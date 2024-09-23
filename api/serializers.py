@@ -218,11 +218,17 @@ class FormularioSerializer(serializers.ModelSerializer):
         model = Formulario
         fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
         
-class GrupoProfesionalSerializer(serializers.ModelSerializer):
+class GrupoProfesionalCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrupoProfesional
         fields = '__all__'
-
+        
+class GrupoProfesionalSerializer(serializers.ModelSerializer):
+    categoria_profesional = CategoriaProfesionalSerializer()
+    class Meta:
+        model = GrupoProfesional
+        fields = ['id', 'nombre','estado','emite_certificado','categoria_profesional']
+        
 class NivelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nivel
