@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views import View
@@ -51,22 +52,36 @@ class ImportProfesionalView(View):
 
         for index, row in df.iterrows():
             try:
-                tipo_documento = get_object_or_404(TipoDocumento, nombre=row['TIPO_DOCUMENTO_NOMBRE'])
-                especialidad = get_object_or_404(Especialidad, nombre=row['ESPECIALIDAD_NOMBRE'])
-                plaza = get_object_or_404(Plaza, nombre=row['PLAZA_NOMBRE'])
-                entidad = get_object_or_404(Entidad, nombre=row['ENTIDAD_NOMBRE'])
-                centro_asistencial = get_object_or_404(Centro_Asistencial, nombre=row['CENTRO_ASISTENCIAL_NOMBRE'])
-                universidad = get_object_or_404(Universidad, nombre=row['UNIVERSIDAD_NOMBRE'])
-                categoria_profesional = get_object_or_404(CategoriaProfesional, nombre=row['CATEGORIA_PROFESIONAL_NOMBRE'])
-                plan_trabajo = get_object_or_404(Plan_trabajo, nombre=row['PLAN_TRABAJO_NOMBRE'])
-                grupo_profesional = get_object_or_404(GrupoProfesional, nombre=row['GRUPO_PROFESIONAL_NOMBRE'])
-                nivel = get_object_or_404(Nivel, nombre=row['NIVEL_NOMBRE'])
-                
+                tipo_documento = get_object_or_404(TipoDocumento, nombre=row['TIPO_DOCUMENTO'])
+                especialidad = get_object_or_404(Especialidad, nombre=row['ESPECIALIDAD'])
+                plaza = get_object_or_404(Plaza, nombre=row['PLAZA'])
+                entidad = get_object_or_404(Entidad, nombre=row['ENTIDAD'])
+                centro_asistencial = get_object_or_404(Centro_Asistencial, nombre=row['CENTRO_ASISTENCIAL'])
+                universidad = get_object_or_404(Universidad, nombre=row['UNIVERSIDAD'])
+                plan_trabajo = get_object_or_404(Plan_trabajo, nombre=row['PLAN_TRABAJO'])
+                nivel = get_object_or_404(Nivel, nombre=row['NIVEL'])
+
+                # Obtener el grupo profesional desde la especialidad
+                grupo_profesional = especialidad.grupo_profesional
+
+                # Verificar que el grupo profesional coincide con el proporcionado en el archivo
+                if grupo_profesional.nombre != row['GRUPO_PROFESIONAL']:
+                    raise ValueError(f"El grupo profesional {grupo_profesional.nombre} no coincide con el proporcionado {row['GRUPO_PROFESIONAL']}")
+
+                # Obtener la categoría profesional desde el grupo profesional
+                categoria_profesional = grupo_profesional.categoria_profesional
+
+                # Verificar que la categoría profesional coincide con la proporcionada en el archivo
+                if categoria_profesional.nombre != row['CATEGORIA']:
+                    raise ValueError(f"La categoría profesional {categoria_profesional.nombre} no coincide con la proporcionada {row['CATEGORIA']}")
+
+                is_postgrado = categoria_profesional.is_postgrado
+                  
                 datos_validos.append({
                     'persona': {
                         'nombre': row['NOMBRE'],
                         'apellido': row['APELLIDO'],
-                        'email': row['EMAIL'],
+                        'email': row['EMAIL'], 
                         'telefono': row['TELEFONO'],
                         'direccion': row['DIRECCION'],
                         'numero_documento': row['NUMERO_DOCUMENTO'],
@@ -76,7 +91,9 @@ class ImportProfesionalView(View):
                         'CMP': row['CMP'],
                         'plaza': plaza,
                         'entidad': entidad,
-                        'centro_Asistencial': centro_asistencial,
+                        'fecha_inscripcion': row['FECHA_INSCRIPCION'],
+                        'fecha_fin': row['FECHA_FIN'], 
+                        'centro_asistencial': centro_asistencial,
                         'universidad_procedencia': universidad,
                         'categoria_profesional': categoria_profesional,
                         'grupo_profesional': grupo_profesional,
@@ -84,8 +101,7 @@ class ImportProfesionalView(View):
                         'plan_trabajo': plan_trabajo,
                         'nivel': nivel,
                         'usuario_modificacion': usuario_modificacion,
-                        'is_postgraduado': row['IS_POSTGRADUADO'],
-                        'estado': row['ESTADO']
+                        'is_postgrado': is_postgrado
                     }
                 })
             except Exception as e:
@@ -95,7 +111,24 @@ class ImportProfesionalView(View):
             return JsonResponse({'message': 'Errores encontrados', 'errores': errores}, status=400)
 
         for datos in datos_validos:
-            persona = Persona.objects.create(**datos['persona'])
-            Profesional.objects.create(persona=persona, **datos['profesional'])
+            with transaction.atomic():
+                try:
+                    # Verificar si la persona ya existe
+                    persona = Persona.objects.filter(numero_documento=datos['persona']['numero_documento']).first()
+                    if not persona:
+                        persona = Persona.objects.create(**datos['persona'])
+                    else:
+                        # Si la persona ya existe, verificar si el profesional ya existe
+                        profesional = Profesional.objects.filter(persona=persona, CMP=datos['profesional']['CMP']).first()
+                        if profesional:
+                            raise ValueError(f"Documento: {datos['persona']['numero_documento']} ya existente")
+
+                    # Crear el profesional si no existe
+                    Profesional.objects.create(persona=persona, **datos['profesional'])
+                except Exception as e:
+                    errores.append(f"Error al crear profesional para la persona con documento {datos['persona']['numero_documento']}: {str(e)}")
+
+        if errores:
+            return JsonResponse({'message': 'Errores encontrados', 'errores': errores}, status=400)
 
         return JsonResponse({'message': 'Datos importados correctamente'}, status=200)

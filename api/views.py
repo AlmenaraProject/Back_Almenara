@@ -75,8 +75,12 @@ class EntidadViewSet(viewsets.ModelViewSet):
     serializer_class = EntidadSerializer
 
 class EspecialidadViewSet(viewsets.ModelViewSet):
-    queryset = Especialidad.objects.all().order_by('id')
+    queryset = Especialidad.objects.all()
     serializer_class = EspecialidadSerializer
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return EspecialidadCreateSerializer
+        return EspecialidadSerializer
 
 class Sede_AdjudicacionViewSet(viewsets.ModelViewSet):
     queryset = Sede_Adjudicacion.objects.all().order_by('id')

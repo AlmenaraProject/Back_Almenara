@@ -58,11 +58,33 @@ class EntidadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Entidad
         fields = '__all__'
-
-class EspecialidadSerializer(serializers.ModelSerializer):
+        
+class CategoriaProfesionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriaProfesional
+        fields = '__all__'
+  
+class GrupoProfesionalCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrupoProfesional
+        fields = '__all__'
+        
+class GrupoProfesionalSerializer(serializers.ModelSerializer):
+    categoria_profesional = CategoriaProfesionalSerializer()
+    class Meta:
+        model = GrupoProfesional
+        fields = ['id', 'nombre','estado','emite_certificado','categoria_profesional']
+class EspecialidadCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Especialidad
         fields = '__all__'
+
+class EspecialidadSerializer(serializers.ModelSerializer):
+    grupo_profesional = GrupoProfesionalSerializer()
+    class Meta:
+        model = Especialidad
+        fields = ['id', 'nombre', 'estado','grupo_profesional']
+        
 class Sede_AdjudicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sede_Adjudicacion
@@ -73,11 +95,7 @@ class CentroAsistencialSerializer(serializers.ModelSerializer):
         model = Centro_Asistencial
         fields = '__all__'
 
-class CategoriaProfesionalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CategoriaProfesional
-        fields = '__all__'
-  
+
 class GerenDependenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gerencia_dependencia
@@ -218,16 +236,6 @@ class FormularioSerializer(serializers.ModelSerializer):
         model = Formulario
         fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
         
-class GrupoProfesionalCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrupoProfesional
-        fields = '__all__'
-        
-class GrupoProfesionalSerializer(serializers.ModelSerializer):
-    categoria_profesional = CategoriaProfesionalSerializer()
-    class Meta:
-        model = GrupoProfesional
-        fields = ['id', 'nombre','estado','emite_certificado','categoria_profesional']
         
 class NivelSerializer(serializers.ModelSerializer):
     class Meta:
