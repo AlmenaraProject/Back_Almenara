@@ -42,7 +42,7 @@ class ImportProfesionalView(View):
             return JsonResponse({'message': str(e)}, status=401)
 
         file = request.FILES['file']
-        df = pd.read_excel(file)
+        df = pd.read_excel(file, dtype={'NUMERO_DOCUMENTO': str, 'CMP': str, 'TELEFONO': str, 'FECHA_INSCRIPCION': str, 'FECHA_FIN': str})
 
         if df.empty:
             return JsonResponse({'message': 'No se importaron datos'}, status=400)
