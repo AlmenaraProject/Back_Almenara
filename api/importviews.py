@@ -56,7 +56,7 @@ class ImportProfesionalView(View):
                 especialidad = get_object_or_404(Especialidad, nombre=row['ESPECIALIDAD'])
                 plaza = get_object_or_404(Plaza, nombre=row['PLAZA'])
                 entidad = get_object_or_404(Entidad, nombre=row['ENTIDAD'])
-                centro_asistencial = get_object_or_404(Centro_Asistencial, nombre=row['CENTRO_ASISTENCIAL'])
+                centro_asistencial = get_object_or_404(Centro_Asistencial, nombre=row['SEDE_DOCENTE'])
                 universidad = get_object_or_404(Universidad, nombre=row['UNIVERSIDAD'])
                 plan_trabajo = get_object_or_404(Plan_trabajo, nombre=row['PLAN_TRABAJO'])
                 nivel = get_object_or_404(Nivel, nombre=row['NIVEL'])
@@ -91,8 +91,8 @@ class ImportProfesionalView(View):
                         'CMP': row['CMP'],
                         'plaza': plaza,
                         'entidad': entidad,
-                        'fecha_inscripcion': row['FECHA_INSCRIPCION'],
-                        'fecha_fin': row['FECHA_FIN'], 
+                        'fecha_inscripcion': row['FECHA_INGRESO'],
+                        'fecha_fin': row['FECHA_EGRESO'], 
                         'centro_asistencial': centro_asistencial,
                         'universidad_procedencia': universidad,
                         'categoria_profesional': categoria_profesional,
