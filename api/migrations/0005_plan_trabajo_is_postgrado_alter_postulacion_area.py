@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='plan_trabajo',
-            name='is_postgrado',
-            field=models.BooleanField(default=False),
-        ),
         migrations.AlterField(
             model_name='postulacion',
             name='area',
