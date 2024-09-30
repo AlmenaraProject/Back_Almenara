@@ -28,6 +28,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Edit the following line and place your railway URL, and your custom URL in the array.
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app", 
+    "https://*.efe5.xyz",
     # NOTE: Place your custom url here if any
 ]
 
