@@ -679,25 +679,6 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
             "message": "Error en la validación de los datos",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # get profesional by dni
-    @action(detail=False, methods=['get'], url_path='numero_documento/(?P<numero_documento>[^/.]+)')
-    @swagger_auto_schema(
-        operation_description="Obtener un profesional por su número de documento",
-        manual_parameters=[openapi.Parameter(
-            'numero_documento', openapi.IN_PATH, description="Número de documento del profesional", type=openapi.TYPE_STRING)],
-        responses={200: ProfesionalSerializer},
-    )
-    def get_profesional_by_dni(self, request, numero_documento=None):
-        if not numero_documento:
-            return Response({"error": "numero_documento is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        profesional = Profesional.objects.filter(persona__numero_documento=numero_documento).first()
-        if not profesional:
-            return Response({"error": "Profesional not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = ProfesionalSerializer(profesional)
-        return Response(serializer.data)
         
 class PasswordResetView(APIView):
     @swagger_auto_schema(
