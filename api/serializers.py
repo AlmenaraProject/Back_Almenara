@@ -1,4 +1,3 @@
-import datetime
 from api.models import *
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
@@ -14,9 +13,28 @@ class RolSerializer(serializers.ModelSerializer):
         model = Rol
         fields = '__all__'
 
+class GrupoOcupacionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grupo_Ocupacional
+        fields = '__all__'
+        
+class CargoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cargo
+        fields = '__all__'
+class EstablecimientoRPASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Establecimiento_RPA
+        fields = '__all__'        
+
 class TipoDocumentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoDocumento
+        fields = '__all__'
+
+class AcuerdoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Acuerdo
         fields = '__all__'
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -40,11 +58,33 @@ class EntidadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Entidad
         fields = '__all__'
-
-class EspecialidadSerializer(serializers.ModelSerializer):
+        
+class CategoriaProfesionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriaProfesional
+        fields = '__all__'
+  
+class GrupoProfesionalCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrupoProfesional
+        fields = '__all__'
+        
+class GrupoProfesionalSerializer(serializers.ModelSerializer):
+    categoria_profesional = CategoriaProfesionalSerializer()
+    class Meta:
+        model = GrupoProfesional
+        fields = ['id', 'nombre','estado','emite_certificado','categoria_profesional']
+class EspecialidadCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Especialidad
         fields = '__all__'
+
+class EspecialidadSerializer(serializers.ModelSerializer):
+    grupo_profesional = GrupoProfesionalSerializer()
+    class Meta:
+        model = Especialidad
+        fields = ['id', 'nombre', 'estado','grupo_profesional']
+        
 class Sede_AdjudicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sede_Adjudicacion
@@ -55,11 +95,7 @@ class CentroAsistencialSerializer(serializers.ModelSerializer):
         model = Centro_Asistencial
         fields = '__all__'
 
-class TipoProfesionalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tipo_profesional
-        fields = '__all__'
-  
+
 class GerenDependenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gerencia_dependencia
@@ -75,19 +111,24 @@ class ProfesionalSerializer(serializers.ModelSerializer):
     def validate(self, data):
         fecha_fin = data.get('fecha_fin')
         fecha_inscripcion = data.get('fecha_inscripcion')
-        
+
         if not fecha_fin or not fecha_inscripcion:
             raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inscripcion' son obligatorios.")
         
         if fecha_fin <= fecha_inscripcion:
             raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
         
+        categoria_profesional = data.get('categoria_profesional')
+        grupo_profesional = data.get('grupo_profesional')
+        if categoria_profesional and GrupoProfesional:
+            if grupo_profesional.categoria_profesional != categoria_profesional:
+                raise serializers.ValidationError("La 'Categoria Profesional' no pertenece al 'Grupo Profesional' seleccionado.")
         errors = {}
         required_fields = [
-            'tipo_profesional', 'especialidad', 'estado', 'is_postgraduado',
-            'centro_Asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
+            'especialidad', 'estado', 'is_postgrado',
+            'centro_asistencial', 'plaza', 'grupo_profesional', 'fecha_inscripcion',
             'fecha_fin', 'nivel', 'entidad', 'plan_trabajo', 'universidad_procedencia',
-            'usuario_modificacion'
+            'usuario_modificacion','categoria_profesional','grupo_profesional'
         ]  
         for field in required_fields:
             if not data.get(field):
@@ -109,13 +150,13 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         profesional = Profesional.objects.create(
             persona=persona,
             CMP=validated_data.get('CMP', None),
-            tipo_profesional=validated_data['tipo_profesional'],
+            categoria_profesional=validated_data['categoria_profesional'],
+            grupo_profesional=validated_data['grupo_profesional'],
             especialidad=validated_data['especialidad'],
             estado=validated_data['estado'],
-            is_postgraduado=validated_data['is_postgraduado'],
-            centro_Asistencial=validated_data['centro_Asistencial'],
+            is_postgrado=validated_data['is_postgrado'],
+            centro_asistencial=validated_data['centro_asistencial'],
             plaza=validated_data['plaza'],
-            grupo_profesional=validated_data['grupo_profesional'],
             fecha_inscripcion=fecha_inscripcion,
             fecha_fin=fecha_fin,
             duracion=duracion,
@@ -134,12 +175,7 @@ class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan_trabajo
         fields = '__all__'
-
-class AcuerdoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Acuerdo
-        fields = '__all__'
-
+        
 class CoordinadorSerializer(serializers.ModelSerializer):       
     class Meta:
         model = Coordinador
@@ -154,12 +190,7 @@ class ProfesorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profesor
         fields = '__all__'
-        
-class PostulacionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Postulacion
-        fields = '__all__'
-        
+             
 class FormularioCreateSerializer(serializers.ModelSerializer):
     curso_id = serializers.PrimaryKeyRelatedField(queryset=Curso.objects.all(), source='curso')
 
@@ -192,18 +223,20 @@ class FormularioCreateSerializer(serializers.ModelSerializer):
         curso = validated_data.pop('curso')
         formulario = Formulario.objects.create(curso=curso, **validated_data)
         return formulario
-
+    
+class PostulacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postulacion
+        fields = '__all__'   
+        
 class FormularioSerializer(serializers.ModelSerializer):
+    postulacion = PostulacionSerializer(many=True)
     curso = CursoSerializer()
     class Meta:
         model = Formulario
         fields = ['id', 'fecha_inicio', 'fecha_fin', 'estado', 'curso', 'postulacion']
-    
-class GrupoProfesionalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Grupo_profesional
-        fields = '__all__'
-
+        
+        
 class NivelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nivel

@@ -12,7 +12,8 @@ routers.register(r'universidad', UniversidadViewSet)
 routers.register(r'especialidad', EspecialidadViewSet)
 routers.register(r'sede-adjudicacion', Sede_AdjudicacionViewSet)
 routers.register(r'centro-asistencial', CentroAsistencialViewSet)
-routers.register(r'tipo-profesional', TipoProfesionalViewSet)
+routers.register(r'categoria-profesional', CategoriaProfesionalViewSet)
+routers.register(r'grupo-profesional', GrupoProfesionalViewSet)
 routers.register(r'plaza', PlazaViewSet)
 routers.register(r'entidad', EntidadViewSet)
 routers.register(r'profesional', ProfesionalViewSet)
@@ -27,6 +28,10 @@ routers.register(r'nivel', NivelViewSet)
 routers.register(r'gerencia-dependencia', GerenciaDependenciaViewSet)
 routers.register(r'formulario', FormularioViewSet)
 routers.register(r'acuerdo', AcuerdoViewSet)
+routers.register(r'cargo', CargoViewSet)
+routers.register(r'grupo-ocupacional', GrupoOcupacionalViewSet)
+routers.register(r'establecimiento_RPA', EstablecimientoRPAViewSet)
+
 
 
 urlpatterns = [

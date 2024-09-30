@@ -31,6 +31,18 @@ class TipoDocumentoViewSet(viewsets.ModelViewSet):
 class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
+
+class CargoViewSet(viewsets.ModelViewSet):
+    queryset = Cargo.objects.all()
+    serializer_class = CargoSerializer
+
+class GrupoOcupacionalViewSet(viewsets.ModelViewSet):
+    queryset = Grupo_Ocupacional.objects.all()
+    serializer_class = GrupoOcupacionalSerializer
+
+class EstablecimientoRPAViewSet(viewsets.ModelViewSet):
+    queryset = Establecimiento_RPA.objects.all()
+    serializer_class = EstablecimientoRPASerializer
     
 class UniversidadFilter(django_filters.FilterSet):
     class Meta:
@@ -63,8 +75,12 @@ class EntidadViewSet(viewsets.ModelViewSet):
     serializer_class = EntidadSerializer
 
 class EspecialidadViewSet(viewsets.ModelViewSet):
-    queryset = Especialidad.objects.all().order_by('id')
+    queryset = Especialidad.objects.all()
     serializer_class = EspecialidadSerializer
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return EspecialidadCreateSerializer
+        return EspecialidadSerializer
 
 class Sede_AdjudicacionViewSet(viewsets.ModelViewSet):
     queryset = Sede_Adjudicacion.objects.all().order_by('id')
@@ -74,9 +90,9 @@ class CentroAsistencialViewSet(viewsets.ModelViewSet):
     queryset = Centro_Asistencial.objects.all().order_by('id')
     serializer_class = CentroAsistencialSerializer
 
-class TipoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Tipo_profesional.objects.all().order_by('id')
-    serializer_class = TipoProfesionalSerializer
+class CategoriaProfesionalViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaProfesional.objects.all()
+    serializer_class = CategoriaProfesionalSerializer
 
 class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
@@ -95,9 +111,13 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     serializer_class = ProfesorSerializer
 
 class GrupoProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = Grupo_profesional.objects.all()
-    serializer_class = GrupoProfesionalSerializer
-
+    queryset = GrupoProfesional.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return GrupoProfesionalCreateSerializer
+        return GrupoProfesionalSerializer
+    
 class NivelViewSet(viewsets.ModelViewSet):
     queryset = Nivel.objects.all()
     serializer_class = NivelSerializer
@@ -193,10 +213,13 @@ class PostulacionViewSet(viewsets.ModelViewSet):
                     'correo': openapi.Schema(type=openapi.TYPE_STRING, description='Correo del postulante'),
                     'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono del postulante'),
                     'profesion': openapi.Schema(type=openapi.TYPE_STRING, description='Profesión del postulante'),
+                    'establecimiento_RPA': openapi.Schema(type=openapi.TYPE_STRING, description='Establecimiento RPA del postulante'),
+                    'grupo_ocupacional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo ocupacional del postulante'),
                     'regimen_laboral': openapi.Schema(type=openapi.TYPE_STRING, description='Regimen laboral del postulante'),
                     'cargo': openapi.Schema(type=openapi.TYPE_STRING, description='Cargo del postulante'),
                     'codigo_planilla': openapi.Schema(type=openapi.TYPE_STRING, description='Código de planilla del postulante'),
                     'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento del postulante'),
+                    'documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento del postulante')
                 }),
             },
             required=['formulario_id', 'postulacion']
@@ -206,14 +229,18 @@ class PostulacionViewSet(viewsets.ModelViewSet):
     def enviar_postulacion(self, request, *args, **kwargs):
         formulario_id = request.data.get('formulario_id')
         postulacion_data = request.data.get('postulacion')
-
+        
         if not formulario_id or not postulacion_data:
             return Response({"error": "Formulario ID and Postulacion data are required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         try:
             formulario = Formulario.objects.get(id=formulario_id)
         except Formulario.DoesNotExist:
             return Response({"error": "Formulario not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        documento_identidad = postulacion_data.get('documento')
+        if formulario.postulacion.filter(documento=documento_identidad).exists():
+            return Response({"error": "Ya existe una postulación con el mismo documento de identidad en este formulario."}, status=status.HTTP_400_BAD_REQUEST)
 
         postulacion_serializer = PostulacionSerializer(data=postulacion_data)
         if postulacion_serializer.is_valid():
@@ -221,9 +248,11 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             formulario.postulacion.add(postulacion)
             formulario.save()
             # Informar que fue agregado en un email
-            context = {'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
-                       'correo': postulacion.correo, 
-                       'curso': formulario.curso.nombre}
+            context = {
+                'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido,
+                'correo': postulacion.correo, 
+                'curso': formulario.curso.nombre
+            }
             email_body = render_to_string('register/sendform_email.html', context)
             email = EmailMessage(
                 'Postulación agregada',
@@ -243,34 +272,54 @@ class PostulacionViewSet(viewsets.ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'ids_postulacion': openapi.Schema(type=openapi.TYPE_ARRAY, 
-                                                  items=openapi.Schema(type=openapi.TYPE_STRING),
-                                                  description='IDs de las postulaciones'),
-                'id_curso': openapi.Schema(type=openapi.TYPE_STRING, description='ID del curso'),
+                'id_curso': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='ID del curso'
+                ),
+                'postulaciones': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING),
+                    description='Diccionario de IDs de postulaciones y sus observaciones'
+                ),
             },
-            required=['ids_postulacion']
+            required=['id_curso', 'postulaciones']
         ),
-        responses={200: "Postulaciones rejected successfully", 400: "Invalid data"},
+        responses={
+            200: openapi.Response(description="Postulaciones rejected successfully"),
+            400: openapi.Response(description="Invalid data"),
+            404: openapi.Response(description="Postulacion or Curso not found"),
+        },
     )
     def rechazar_postulacion(self, request, *args, **kwargs):
-        ids_postulacion = request.data.get('ids_postulacion')
         id_curso = request.data.get('id_curso')
-        if ids_postulacion is None:
-            return Response({"error": "id_postulacion is required"}, status=status.HTTP_400_BAD_REQUEST)
+        postulaciones_data = request.data.get('postulaciones', {})
+
         if id_curso is None:
             return Response({"error": "id_curso is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(postulaciones_data, dict):
+            return Response({"error": "postulaciones must be a dictionary"}, status=status.HTTP_400_BAD_REQUEST)
+        ids_postulacion = list(postulaciones_data.keys())
+
         try:
             postulaciones = Postulacion.objects.filter(id__in=ids_postulacion)
         except Postulacion.DoesNotExist:
             return Response({"error": "Postulacion not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        try:
+            curso = Curso.objects.get(id=id_curso)
+        except Curso.DoesNotExist:
+            return Response({"error": "Curso not found"}, status=status.HTTP_404_NOT_FOUND)
+
         # Informar que fue rechazado en un email
         for postulacion in postulaciones:
-            curso = Curso.objects.get(id=id_curso)
-            context = {'nombre': postulacion.nombre,
-                       'apellido': postulacion.apellido,
-                       'correo': postulacion.correo,
-                       'curso': curso.nombre}
+            observacion = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            context = {
+                'nombre': postulacion.nombre,
+                'apellido': postulacion.apellido,
+                'correo': postulacion.correo,
+                'curso': curso.nombre,
+                'observacion': observacion
+            }
             email_body = render_to_string('register/reject_email.html', context)
             email = EmailMessage(
                 'Rechazo de postulación',
@@ -280,10 +329,15 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             )
             email.content_subtype = 'html'
             email.send()
-            
-        postulaciones.delete()
-        
+
+        postulaciones.update(is_rejected=True)
+        for postulacion in postulaciones:
+            postulacion.observaciones = postulaciones_data.get(str(postulacion.id), "No se proporcionó un motivo de rechazo.")
+            postulacion.save()
+            curso.postulacion.add(*postulaciones)
+            curso.save()
         return Response({"message": "Postulaciones rejected successfully"}, status=status.HTTP_200_OK)
+
      
     @action(detail=False, methods=['post'], url_path='aceptar-postulacion')
     @swagger_auto_schema(
@@ -317,7 +371,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             return Response({"error": "No valid postulaciones found"}, status=status.HTTP_404_NOT_FOUND)
         
         postulaciones.update(estado=True)
-        
+        postulaciones.update(is_rejected=False)
         curso.postulacion.add(*postulaciones)
         curso.save()
         
@@ -338,8 +392,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email.content_subtype = 'html'
             email.send()
 
-        return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)
-        
+        return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)     
 
 class CursoFilter(django_filters.FilterSet):
     class Meta:
@@ -361,7 +414,7 @@ class CursoViewSet(viewsets.ModelViewSet):
     ])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+   
 class SingnupView(APIView):
     @swagger_auto_schema(
         operation_description="Registro de usuario",
@@ -537,7 +590,11 @@ def logout(request):
 class ProfesionalFilter(django_filters.FilterSet):
     class Meta:
         model = Profesional
-        fields = ['persona','CMP','fecha_inscripcion','fecha_modificacion','estado','especialidad','centro_Asistencial','tipo_profesional','plaza','entidad']
+        fields = [
+            'persona', 'CMP', 'plaza', 'entidad', 'centro_asistencial', 'universidad_procedencia',
+            'categoria_profesional', 'grupo_profesional', 'especialidad', 'is_postgrado', 'sede_adjudicacion',
+            'plan_trabajo', 'fecha_inscripcion', 'fecha_fin', 'duracion', 'gerencia_dependencia', 'nivel', 'estado'
+        ]
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
@@ -565,58 +622,83 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'persona': openapi.Schema(type=openapi.TYPE_OBJECT, description='Datos de la persona', properties={
-                    'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
-                    'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
-                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
-                    'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
-                    'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
-                    'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
-                    'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
-                }),
-                'CMP': openapi.Schema(type=openapi.TYPE_STRING, description='CMP'),
-                'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de inscripción'),
-                'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de modificación'),
-                'estado': openapi.Schema(type=openapi.TYPE_STRING, description='Estado'),
-                'centro_Asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='Centro Asistencial'),
-                'tipo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Tipo de profesional'),
-                'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='Grupo de profesional'),
-                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='Especialidad'),
-                'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='Plaza'),
-                'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='Entidad'),
-                'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, description='Fecha de fin'),
-                'duracion': openapi.Schema(type=openapi.TYPE_STRING, description='Duración'),
-                'sede_Adjudicacion': openapi.Schema(type=openapi.TYPE_STRING, description='Sede de adjudicación'),
-                'gerencia_dependencia': openapi.Schema(type=openapi.TYPE_STRING, description='Gerencia o dependencia'),
-                'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='Universidad de procedencia'),
-                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='Plan de trabajo'),
-                'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='Usuario de modificación'),
-                'is_postgraduado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Postgraduado'),
-                'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='Nivel'),
+                'persona': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description='Datos de la persona',
+                    properties={
+                        'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
+                        'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
+                        'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
+                        'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
+                        'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
+                        'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
+                    },
+                    required=['nombre', 'apellido', 'email', 'telefono', 'numero_documento', 'tipo_documento']
+                ),
+                'CMP': openapi.Schema(type=openapi.TYPE_STRING, description='Código CMP del profesional'),
+                'fecha_inscripcion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de inscripción'),
+                'fecha_modificacion': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de modificación'),
+                'estado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Estado del profesional'),
+                'centro_asistencial': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Centro Asistencial donde labora'),
+                'categoria_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Tipo de profesional (CategoriaProfesional)'),
+                'grupo_profesional': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Grupo Profesional'),
+                'especialidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Especialidad del profesional'),
+                'plaza': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Plaza'),
+                'entidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Entidad a la que pertenece'),
+                'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de fin de contrato o trabajo'),
+                'duracion': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duración en meses'),
+                'is_postgrado': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Indica si el profesional es postgrado'),
+                'sede_adjudicacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Sede de adjudicación'),
+                'gerencia_dependencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Gerencia o dependencia del profesional'),
+                'universidad_procedencia': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Universidad de procedencia'),
+                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Plan de trabajo asignado'),
+                'usuario_modificacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID del usuario que realizó la última modificación'),
+                'nivel': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Nivel del profesional'),
             },
-            required=['persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'especialidad', 'centro_Asistencial', 'tipo_profesional', 'plaza', 'entidad', 'universidad_procedencia', 'plan_trabajo', 'usuario_modificacion', 'is_postgraduado', 'nivel'],
+            required=[
+                'persona', 'CMP', 'fecha_inscripcion', 'fecha_modificacion', 'estado', 'centro_asistencial',
+                'categoria_profesional', 'grupo_profesional', 'especialidad', 'plaza', 'entidad', 'universidad_procedencia',
+                'plan_trabajo', 'usuario_modificacion', 'is_postgrado', 'nivel'
+            ],
         ),
         responses={
-            201: openapi.Response('Profesional created successfully', ProfesionalSerializer),
-            400: "Invalid data",
+            201: openapi.Response('Profesional creado exitosamente', ProfesionalSerializer),
+            400: "Datos inválidos",
         },
     )
     def create(self, request, *args, **kwargs):
-        persona_data = request.data.get('persona')
-        profesional_data = request.data
-
-        persona_serializer = PersonaSerializer(data=persona_data)
-        if persona_serializer.is_valid():
-            persona = persona_serializer.save()
-            profesional_serializer = ProfesionalSerializer(data=profesional_data)
-            if profesional_serializer.is_valid():
-                profesional_serializer.save()
-                return Response(profesional_serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                persona.delete()  # Rollback persona creation if profesional data is invalid
-                return Response(profesional_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(persona_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProfesionalSerializer(data=request.data)
+        if serializer.is_valid():
+            profesional = serializer.save()
+            return Response({
+                "message": "Profesional creado exitosamente",
+                "data": ProfesionalSerializer(profesional).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "Error en la validación de los datos",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
     
+    # get profesional by dni
+    @action(detail=False, methods=['get'], url_path='numero_documento/(?P<numero_documento>[^/.]+)')
+    @swagger_auto_schema(
+        operation_description="Obtener un profesional por su número de documento",
+        manual_parameters=[openapi.Parameter(
+            'numero_documento', openapi.IN_PATH, description="Número de documento del profesional", type=openapi.TYPE_STRING)],
+        responses={200: ProfesionalSerializer},
+    )
+    def get_profesional_by_dni(self, request, numero_documento=None):
+        if not numero_documento:
+            return Response({"error": "numero_documento is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        profesional = Profesional.objects.filter(persona__numero_documento=numero_documento).first()
+        if not profesional:
+            return Response({"error": "Profesional not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = ProfesionalSerializer(profesional)
+        return Response(serializer.data)
+        
 class PasswordResetView(APIView):
     @swagger_auto_schema(
         operation_description="Enviar correo electrónico de restablecimiento de contraseña",
