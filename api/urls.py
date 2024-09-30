@@ -33,7 +33,6 @@ routers.register(r'grupo-ocupacional', GrupoOcupacionalViewSet)
 routers.register(r'establecimiento_RPA', EstablecimientoRPAViewSet)
 
 
-
 urlpatterns = [
     path('', include(routers.urls)),
     path('signup/', SingnupView.as_view(), name='signup'),
