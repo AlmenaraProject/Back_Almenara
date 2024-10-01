@@ -65,15 +65,15 @@ class ImportProfesionalView(View):
                 grupo_profesional = especialidad.grupo_profesional
 
                 # Verificar que el grupo profesional coincide con el proporcionado en el archivo
-                if grupo_profesional.nombre != row['GRUPO_PROFESIONAL']:
-                    raise ValueError(f"El grupo profesional {grupo_profesional.nombre} no coincide con el proporcionado {row['GRUPO_PROFESIONAL']}")
+                if grupo_profesional.nombre != row['MODALIDAD']:
+                    raise ValueError(f"El grupo profesional {grupo_profesional.nombre} no coincide con el proporcionado {row['MODALIDAD']}")
 
                 # Obtener la categoría profesional desde el grupo profesional
                 categoria_profesional = grupo_profesional.categoria_profesional
 
                 # Verificar que la categoría profesional coincide con la proporcionada en el archivo
                 if categoria_profesional.nombre != row['CATEGORIA']:
-                    raise ValueError(f"La categoría profesional {categoria_profesional.nombre} no coincide con la proporcionada {row['CATEGORIA']}")
+                    raise ValueError(f"La categoría profesional {categoria_profesional.nombre} no coincide con la proporcionada {row['TIPO']}")
 
                 is_postgrado = categoria_profesional.is_postgrado
                   
