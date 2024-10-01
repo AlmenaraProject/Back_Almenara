@@ -72,15 +72,15 @@ class ImportProfesionalView(View):
                 categoria_profesional = grupo_profesional.categoria_profesional
 
                 # Verificar que la categoría profesional coincide con la proporcionada en el archivo
-                if categoria_profesional.nombre != row['CATEGORIA']:
+                if categoria_profesional.nombre != row['TIPO']:
                     raise ValueError(f"La categoría profesional {categoria_profesional.nombre} no coincide con la proporcionada {row['TIPO']}")
 
                 is_postgrado = categoria_profesional.is_postgrado
                   
                 datos_validos.append({
                     'persona': {
-                        'nombre': row['NOMBRE'],
-                        'apellido': row['APELLIDO'],
+                        'nombre': row['NOMBRES'],
+                        'apellido': row['APELLIDOS'],
                         'email': row['EMAIL'], 
                         'telefono': row['TELEFONO'],
                         'direccion': row['DIRECCION'],
