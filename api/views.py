@@ -100,6 +100,9 @@ class PlanTrabajoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['patch'], url_path='add-acuerdo')
     @swagger_auto_schema(
         operation_description="Agregar un acuerdo a un plan de trabajo",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID del plan de trabajo", type=openapi.TYPE_INTEGER)
+        ],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={ 'acuerdo_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID del acuerdo') },
@@ -107,7 +110,7 @@ class PlanTrabajoViewSet(viewsets.ModelViewSet):
         ),
         responses={200: "Acuerdo added successfully", 400: "Invalid data"},
     )
-    def add_acuerdo(self, request, *args, **kwargs):
+    def add_acuerdo(self, request):
         plan_trabajo_id = request.query_params.get('id')
         if not plan_trabajo_id:
             return Response({"detail": "id is required."}, status=status.HTTP_400_BAD_REQUEST)
