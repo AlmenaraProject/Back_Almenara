@@ -1,3 +1,4 @@
+import os
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 from api.serializers import *
@@ -279,6 +280,10 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             return Response({"error": "Formulario not found"}, status=status.HTTP_404_NOT_FOUND)
 
         documento_identidad = postulacion_data.get('documento')
+        
+        if formulario.postulacion.filter(documento=documento_identidad).extra(where=['is_rejected'==True]).exists():
+            return Response({"error": "Ya existe una postulación rechazada con el mismo documento de identidad en algun formulario."}, status=status.HTTP_400_BAD_REQUEST)
+            
         if formulario.postulacion.filter(documento=documento_identidad).exists():
             return Response({"error": "Ya existe una postulación con el mismo documento de identidad en este formulario."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -297,7 +302,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email = EmailMessage(
                 'Postulación agregada',
                 email_body,
-                'testalmenara@gmail.com',
+                os.environ["EMAIL_HOST_USER"],
                 [postulacion.correo],
             )
             email.content_subtype = 'html'
@@ -364,7 +369,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email = EmailMessage(
                 'Rechazo de postulación',
                 email_body,
-                'testalmenara@gmail.com',
+                os.environ["EMAIL_HOST_USER"],
                 [postulacion.correo],
             )
             email.content_subtype = 'html'
@@ -426,7 +431,7 @@ class PostulacionViewSet(viewsets.ModelViewSet):
             email = EmailMessage(
                 'Confirmación de postulación',
                 email_body,
-                'testalmenara@gmail.com',
+                os.environ["EMAIL_HOST_USER"],
                 [postulacion.correo],
             )
             email.content_subtype = 'html'
@@ -434,6 +439,51 @@ class PostulacionViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "Postulaciones migrated successfully"}, status=status.HTTP_200_OK)     
 
+    @action(detail=False, methods=['post'], url_path='enviar-certificado')
+    @swagger_auto_schema(
+        operation_description="Enviar certificado a los postulantes",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'link': openapi.Schema(type=openapi.TYPE_STRING, description='Link del certificado'),
+                'id_curso': openapi.Schema(type=openapi.TYPE_STRING, description='ID del curso'),
+                'id_postulacion': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la postulación'),
+            },
+            required=['link', 'id_curso', 'id_postulacion']
+        ),
+        responses={200: "Certificado enviado correctamente", 400: "Invalid data"},
+    )
+    def enviar_certificado(self, request, *args, **kwargs):
+        link = request.data.get('link')
+        id_curso = request.data.get('id_curso')
+        id_postulacion = request.data.get('id_postulacion')
+
+        if not link:
+            return Response({"error": "Link is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            postulacion = Postulacion.objects.get(id=id_postulacion) 
+        except Postulacion.DoesNotExist:
+            return Response({"error": "Postulacion not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        curso = Curso.objects.get(id=id_curso)
+        if not curso.exists() or not postulacion.exists():
+            return Response({"error": "Curso y Postulacion son requeridos"}, status=status.HTTP_400_BAD_REQUEST)
+        postulacion.link = link
+        postulacion.certificado_estado = True
+        postulacion.save()
+        context = {'curso': curso.nombre, 'link': link, 'nombre_completo': postulacion.nombre + ' ' + postulacion.apellido, 'fecha_fin': curso.fecha_fin}
+        email_body = render_to_string('certified/certificate_email.html', context)
+        email = EmailMessage(
+            'Certificado de finalización',
+            email_body,
+            os.environ["EMAIL_HOST_USER"],
+            [postulacion.correo],
+        )
+        email.content_subtype = 'html'
+        email.send()        
+        return Response({"message": "Certificado enviado correctamente"}, status=status.HTTP_200_OK)
+    
 class CursoFilter(django_filters.FilterSet):
     class Meta:
         model = Curso
@@ -511,7 +561,7 @@ class SingnupView(APIView):
                 email = EmailMessage(
                     'Confirmación de registro',
                     email_body,
-                    'testalmenara@gmail.com',
+                    os.environ["EMAIL_HOST_USER"],
                     [user.email],
                 )
                 email.content_subtype = 'html'  # Establecer el contenido como HTML
@@ -740,7 +790,7 @@ class PasswordResetView(APIView):
         if form.is_valid():
             opts = {
                 'use_https': request.is_secure(),
-                'from_email': 'testalmenara@gmail.com',
+                'from_email': os.environ["EMAIL_HOST_USER"],
                 'request': request,
                 'html_email_template_name': 'recover/password_reset_email.html',
                 'extra_email_context': {'host': request.get_host()}

@@ -314,6 +314,8 @@ class Postulacion(models.Model):
     notas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ejemplo de campo para nota
     observaciones = models.TextField(null=True, blank=True)
     is_rejected = models.BooleanField(default=False)
+    link = models.URLField(null=True)
+    certificado_estado = models.BooleanField(default=False)
     estado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre + ' ' + self.apellido + ' ' + ' ' + self.fecha_postulacion.strftime('%d/%m/%Y')
