@@ -284,6 +284,7 @@ class Curso(models.Model):
     postulacion = models.ManyToManyField('Postulacion', blank=True)
     profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE, null=True)
     modalidad = models.CharField(max_length=100)
+    link = models.URLField(null=True)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     estado = models.BooleanField(default=True)

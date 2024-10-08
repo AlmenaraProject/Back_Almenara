@@ -97,6 +97,43 @@ class CategoriaProfesionalViewSet(viewsets.ModelViewSet):
 class PlanTrabajoViewSet(viewsets.ModelViewSet):
     queryset = Plan_trabajo.objects.all()
     serializer_class = PlanTrabajoSerializer
+    @action(detail=False, methods=['patch'], url_path='add-acuerdo')
+    @swagger_auto_schema(
+        operation_description="Agregar un acuerdo a un plan de trabajo",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={ 'acuerdo_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID del acuerdo') },
+            required=['acuerdo_id']
+        ),
+        responses={200: "Acuerdo added successfully", 400: "Invalid data"},
+    )
+    def add_acuerdo(self, request, *args, **kwargs):
+        plan_trabajo_id = request.query_params.get('id')
+        if not plan_trabajo_id:
+            return Response({"detail": "id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        acuerdo_id = request.data.get('acuerdo_id')
+        if not acuerdo_id:
+            return Response({"detail": "acuerdo_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        acuerdo = request.data.get('acuerdo')
+        if not acuerdo:
+            return Response({"detail": "acuerdo is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Assuming you have a model PlanTrabajo and Acuerdo
+        try:
+            plan_trabajo = Plan_trabajo.objects.get(id=plan_trabajo_id)
+            acuerdo_instance = Acuerdo.objects.get(id=acuerdo_id)
+        except Plan_trabajo.DoesNotExist:
+            return Response({"detail": "PlanTrabajo not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Acuerdo.DoesNotExist:
+            return Response({"detail": "Acuerdo not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Add the acuerdo to the plan_trabajo
+        plan_trabajo.acuerdos.add(acuerdo_instance)
+        
+        return Response({"detail": "Acuerdo added successfully."}, status=status.HTTP_200_OK)
+        
 
 class AcuerdoViewSet(viewsets.ModelViewSet):
     queryset = Acuerdo.objects.all()
