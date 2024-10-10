@@ -85,6 +85,45 @@ class EspecialidadSerializer(serializers.ModelSerializer):
         model = Especialidad
         fields = ['id', 'nombre', 'estado','grupo_profesional']
         
+class FacultadCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facultad
+        fields = '__all__'
+              
+class FacultadSerializer(serializers.ModelSerializer):
+    universidad = UniversidadSerializer()
+    class Meta:
+        model = Facultad
+        fields = ['id', 'nombre', 'estado', 'universidad']
+        
+class CarreraCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Carrera
+        fields = '__all__'
+        
+class CarreraSerializer(serializers.ModelSerializer):
+    facultad = FacultadSerializer()
+    class Meta:
+        model = Carrera
+        fields = ['id', 'nombre', 'estado', 'facultad']
+               
+class AsignaturaCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Asignatura
+        fields = '__all__'
+        
+class AsignaturaSerializer(serializers.ModelSerializer):
+    carrera = CarreraSerializer()
+    class Meta:
+        model = Asignatura
+        fields = ['id', 'nombre', 'estado', 'carrera']
+
+        
+class CampoClinicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campo_clinico
+        fields = '__all__'       
+         
 class Sede_AdjudicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sede_Adjudicacion
@@ -171,6 +210,75 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         profesional.save()
         return profesional
 
+class ProfesionalPregradoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profesional
+        fields = '__all__'
+
+    def validate(self, data):
+        fecha_fin = data.get('fecha_fin')
+        fecha_inscripcion = data.get('fecha_inscripcion')
+
+        if not fecha_fin or not fecha_inscripcion:
+            raise serializers.ValidationError("Los campos 'fecha_fin' y 'fecha_inscripcion' son obligatorios.")
+        
+        if fecha_fin <= fecha_inscripcion:
+            raise serializers.ValidationError("La 'fecha_fin' debe ser posterior a la 'fecha_inscripcion'.")
+        
+        universidad = data.get('universidad')
+        facultad = data.get('facultad')
+        carrera = data.get('carrera')
+        asignatura = data.get('asignatura')
+        if universidad and facultad and carrera and asignatura:
+            if asignatura.carrera.facultad.universidad != universidad:
+                raise serializers.ValidationError("La 'Universidad' no pertenece a la 'Asignatura' seleccionada.")
+            if asignatura.carrera.facultad != facultad:
+                raise serializers.ValidationError("La 'Facultad' no pertenece a la 'Asignatura' seleccionada.")
+            if asignatura.carrera != carrera:
+                raise serializers.ValidationError("La 'Carrera' no pertenece a la 'Asignatura' seleccionada.")
+    
+        errors = {}
+        required_fields = [
+            'universidad', 'facultad', 'carrera',
+            'asignatura', 'ciclo', 'fecha_inscripcion', 'fecha_fin',
+            'plan_trabajo', 'profesor', 'campo_clinico', 'estado'
+        ]  
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = 'Este campo es obligatorio.'
+
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return data
+    
+    def create(self, validated_data):
+        persona_data = validated_data.pop('persona')
+        persona = Persona.objects.create(**persona_data)
+        
+        fecha_fin = validated_data['fecha_fin']
+        fecha_inicio = validated_data['fecha_inscripcion']
+        duracion = (fecha_fin - fecha_inicio).days
+        
+        profesionalpregrado = Profesional_pregrado.objects.create(
+            persona = persona,
+            universidad = validated_data['universidad'],
+            facultad = validated_data['facultad'],
+            carrera = validated_data['carrera'],
+            asignatura = validated_data['asignatura'],
+            ciclo = validated_data['ciclo'],
+            fecha_inscripcion = fecha_inicio,
+            fecha_fin = fecha_fin,
+            duracion = duracion,
+            plan_trabajo = validated_data['plan_trabajo'],
+            profesor = validated_data['profesor'],
+            induccion = validated_data.get('induccion', None),
+            campo_clinico = validated_data['campo_clinico'],
+            estado = validated_data['estado']
+        )      
+        profesionalpregrado.save()
+        return profesionalpregrado   
+    
 class PlanTrabajoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan_trabajo

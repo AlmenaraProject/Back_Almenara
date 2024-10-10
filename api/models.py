@@ -97,6 +97,35 @@ class Universidad(models.Model):
         self.siglas = self.siglas.upper()
         self.ciudad = self.ciudad.upper()
         super(Universidad, self).save(*args, **kwargs)
+
+class Facultad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Facultad, self).save(*args, **kwargs)
+        
+class Carrera(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    facultad = models.ForeignKey('Facultad', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    
+class Asignatura(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    carrera = models.ForeignKey('Carrera', on_delete=models.CASCADE)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Asignatura, self).save(*args, **kwargs)
+
     
 class Sede_Adjudicacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -224,6 +253,39 @@ class Profesional(models.Model):
     def __str__(self):
         return f'{self.persona.nombre} {self.persona.apellido}'
 
+class Campo_clinico(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.nombre
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Campo_clinico, self).save(*args, **kwargs)
+
+class Profesional_pregrado(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    persona = models.OneToOneField('Persona', on_delete=models.CASCADE)
+    
+    # Relaciones con Universidad, Facultad, Carrera, y Asignatura
+    universidad = models.ForeignKey('Universidad', on_delete=models.CASCADE)
+    facultad = models.ForeignKey('Facultad', on_delete=models.CASCADE)
+    carrera = models.ForeignKey('Carrera', on_delete=models.CASCADE)
+    asignatura = models.ForeignKey('Asignatura', on_delete=models.CASCADE)
+    ciclo = models.CharField(max_length=100)
+    fecha_inscripcion = models.DateField()
+    fecha_fin = models.DateField()
+    plan_trabajo = models.ForeignKey('Plan_trabajo', on_delete=models.CASCADE)
+    profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE)
+    campo_clinico = models.ForeignKey('Campo_clinico', on_delete=models.CASCADE)
+    induccion = models.BooleanField(default=False)
+    duracion = models.IntegerField(null=True)
+    estado = models.BooleanField(default=True)
+    def __str__(self):
+        return self.persona.nombre + ' ' + self.persona.apellido + ' ' + self.fecha_inicio.strftime('%d/%m/%Y') + ' ' + self.fecha_fin.strftime('%d/%m/%Y')
+    def save(self , *args, **kwargs):
+        self.nombre = self.nombre.upper()
+        super(Profesional_pregrado, self).save(*args, **kwargs)
     
 class Gerencia_dependencia(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

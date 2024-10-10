@@ -67,12 +67,39 @@ class UniversidadViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+class FacultadViewSet(viewsets.ModelViewSet):
+    queryset = Facultad.objects.all()
+    serializer_class = FacultadSerializer
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return FacultadCreateSerializer
+        return FacultadSerializer
+
+class CarreraViewSet(viewsets.ModelViewSet):
+    queryset = Carrera.objects.all()
+    serializer_class = CarreraSerializer
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return CarreraCreateSerializer
+        return CarreraSerializer
+
+class AsignaturaViewSet(viewsets.ModelViewSet):
+    queryset = Asignatura.objects.all()
+    serializer_class = AsignaturaSerializer
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return AsignaturaCreateSerializer
+        return AsignaturaSerializer
+class CampoClinicoViewSet(viewsets.ModelViewSet):
+    queryset = Campo_clinico.objects.all()
+    serializer_class = CampoClinicoSerializer
+
 class PlazaViewSet(viewsets.ModelViewSet):
-    queryset = Plaza.objects.all().order_by('id')
+    queryset = Plaza.objects.all()
     serializer_class = PlazaSerializer
 
 class EntidadViewSet(viewsets.ModelViewSet):
-    queryset = Entidad.objects.all().order_by('id')
+    queryset = Entidad.objects.all()
     serializer_class = EntidadSerializer
 
 class EspecialidadViewSet(viewsets.ModelViewSet):
@@ -138,7 +165,6 @@ class PlanTrabajoViewSet(viewsets.ModelViewSet):
         
         return Response({"detail": "Acuerdo added successfully."}, status=status.HTTP_200_OK)
         
-
 class AcuerdoViewSet(viewsets.ModelViewSet):
     queryset = Acuerdo.objects.all()
     serializer_class = AcuerdoSerializer
@@ -769,7 +795,84 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
             "message": "Error en la validación de los datos",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfesionalPregradoFilter(django_filters.FilterSet):
+    class Meta:
+        model = Profesional_pregrado
+        fields = ['persona', 'universidad', 'facultad', 'carrera','ciclo', 'fecha_inscripcion', 'fecha_fin','plan_trabajo', 'estado']
+
+
+class ProfesionalPregradoViewSet(viewsets.ModelViewSet):
+    queryset = Profesional_pregrado.objects.all()
+    serializer_class = ProfesionalPregradoSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProfesionalPregradoFilter
+    
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('persona', openapi.IN_QUERY, description="Persona", type=openapi.TYPE_STRING),
+        openapi.Parameter('universidad', openapi.IN_QUERY, description="Universidad", type=openapi.TYPE_STRING),
+        openapi.Parameter('facultad', openapi.IN_QUERY, description="Facultad", type=openapi.TYPE_STRING),
+        openapi.Parameter('carrera', openapi.IN_QUERY, description="Carrera", type=openapi.TYPE_STRING),
+        openapi.Parameter('asignatura', openapi.IN_QUERY, description="Asignatura", type=openapi.TYPE_STRING),
+        openapi.Parameter('ciclo', openapi.IN_QUERY, description="Ciclo", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_inscripcion', openapi.IN_QUERY, description="Fecha de inscripción", type=openapi.TYPE_STRING),
+        openapi.Parameter('fecha_fin', openapi.IN_QUERY, description="Fecha de fin", type=openapi.TYPE_STRING),
+        openapi.Parameter('estado', openapi.IN_QUERY, description="Estado", type=openapi.TYPE_STRING),
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+ 
+    @swagger_auto_schema(
+        operation_description="Crear un profesional pregrado junto con los datos de la persona",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'persona': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description='Datos de la persona',
+                    properties={
+                        'nombre': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la persona'),
+                        'apellido': openapi.Schema(type=openapi.TYPE_STRING, description='Apellido de la persona'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email de la persona'),
+                        'telefono': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono de la persona'),
+                        'direccion': openapi.Schema(type=openapi.TYPE_STRING, description='Dirección de la persona'),
+                        'numero_documento': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento de la persona'),
+                        'tipo_documento': openapi.Schema(type=openapi.TYPE_STRING, description='ID del tipo de documento de la persona'),
+                    },
+                    required=['nombre', 'apellido', 'email', 'telefono', 'numero_documento', 'tipo_documento']
+                ),
+                'universidad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Universidad'),
+                'facultad': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Facultad'),
+                'carrera': openapi.Schema(type=openapi.TYPE_STRING, description='ID de la Carrera'),
+                'ciclo': openapi.Schema(type=openapi.TYPE_STRING, description='Ciclo académico'),
+                'fecha_inicio': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de inicio'),
+                'fecha_fin': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Fecha de fin'),
+                'plan_trabajo': openapi.Schema(type=openapi.TYPE_STRING, description='ID del Plan de trabajo asignado'),
+                'estado': openapi.Schema(type=openapi.TYPE_STRING, description='Estado del profesional'),
+            },
+            required=[
+                'persona', 'universidad', 'facultad', 'carrera', 'ciclo', 'fecha_inicio', 'fecha_fin', 'plan_trabajo', 'estado'
+            ],
+        ),
+        responses={
+            201: openapi.Response('Profesional pregrado creado exitosamente', ProfesionalPregradoSerializer),
+            400: "Datos inválidos",
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = ProfesionalPregradoSerializer(data=request.data)
+        if serializer.is_valid():
+            profesional_pregrado = serializer.save()
+            return Response({
+                "message": "Profesional pregrado creado exitosamente",
+                "data": ProfesionalPregradoSerializer(profesional_pregrado).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "Error en la validación de los datos",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
         
+               
 class PasswordResetView(APIView):
     @swagger_auto_schema(
         operation_description="Enviar correo electrónico de restablecimiento de contraseña",
