@@ -212,7 +212,7 @@ class ProfesionalSerializer(serializers.ModelSerializer):
 
 class ProfesionalPregradoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Profesional
+        model = Profesional_pregrado
         fields = '__all__'
 
     def validate(self, data):
